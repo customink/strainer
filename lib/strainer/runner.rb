@@ -83,7 +83,8 @@ module Strainer
 
     def output(label, data)
       data.to_s.strip.split("\n").each do |line|
-        puts [ label_with_padding(label), line ].join(' ')
+        $stdout.puts [ label_with_padding(label), line ].join(' ')
+        $stdout.flush
       end
     end
   end
