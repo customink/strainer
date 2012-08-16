@@ -36,6 +36,15 @@ As of `v0.0.3`, there's an option for `--fail-fast` that will fail immediately w
 
     $ bundle exec strain phantomjs --fail-fast
 
+Custom Foodcritic Rules
+-----------------------
+I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
+
+Strainer runs everything in an isolated sandbox, inside your Chef Repo. The root of your Chef Repo is two folders above the sandbox environment. This means, when including additional foodcritic rules, you need to do something like this:
+
+    # Colanderfile
+    foodcritic: bundle exec foodcritic -I ../../foodcritic/* -f any $COOKBOOK
+
 Needs Your Help
 ---------------
 This is a list of features or problem *you* can help solve! Fork and submit a pull request to make Strain even better!
