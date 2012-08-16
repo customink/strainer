@@ -3,18 +3,23 @@ module Strainer
     def initialize(sandbox, options = {})
       @sandbox = sandbox
       @cookbooks = @sandbox.cookbooks
-
-      @results = Hash.new(0)
+      @options = options
 
       @cookbooks.each do |cookbook|
-        puts Color.negative{ "# Straining '#{cookbook}'" }
-        commands_for(cookbook).collect do |command|
-          run(command)
-        end
-        puts "\n\n\n"
-      end
+        $stdout.puts
+        $stdout.puts Color.negative{ "# Straining '#{cookbook}'" }.to_s
 
-      abort unless @results[:failed].zero?
+        commands_for(cookbook).collect do |command|
+          success = run(command)
+
+          if fail_fast? && !success
+            $stdout.puts [ label_with_padding(command[:label]), Color.red{ 'Exited early because --fail-fast was specified. Some tests may have been skipped!' } ].join(' ')
+            abort
+          end
+        end
+
+        $stdout.puts
+      end
     end
 
     private
@@ -67,25 +72,38 @@ module Strainer
       label = command[:label]
       command = command[:command]
 
-      puts [ label_with_padding(label), Color.bold{ Color.underscore{ command } } ].join(' ')
-      output(label, `cd #{@sandbox.sandbox_path} && #{command}`)
+      $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ command } } ].join(' ')
+
+      result = format(label, `(cd #{@sandbox.sandbox_path} && #{command})`)
+      $stdout.puts result unless result.strip.empty?
 
       if $?.success?
-        @results[:passed] += 1
-        output(label, Color.green{'Success!'})
-        return true
+        $stdout.puts format(label, Color.green{'Success!'})
+        $stdout.flush
+        true
       else
-        @results[:failed] += 1
-        output(label, Color.red{'Failure!'})
-        return false
+        $stdout.puts format(label, Color.red{'Failure!'})
+        $stdout.flush
+        false
       end
     end
 
-    def output(label, data)
-      data.to_s.strip.split("\n").each do |line|
-        $stdout.puts [ label_with_padding(label), line ].join(' ')
-        $stdout.flush
-      end
+    def format(label, data)
+      data.to_s.strip.split("\n").collect do |line|
+        if %w(fatal error alert).any?{ |e| line =~ /^#{e}/i }
+          [ label_with_padding(label), Color.red{ line } ].join(' ')
+        elsif %w(warn).any?{ |e| line =~ /^#{e}/i }
+          [ label_with_padding(label), Color.yellow{ line } ].join(' ')
+        elsif %w(info debug).any?{ |e| line =~ /^#{e}/i }
+          [ label_with_padding(label), Color.cyan{ line } ].join(' ')
+        else
+          [ label_with_padding(label), line ].join(' ')
+        end
+      end.join("\n")
+    end
+
+    def fail_fast?
+      @options[:fail_fast]
     end
   end
 end

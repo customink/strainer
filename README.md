@@ -27,10 +27,14 @@ That `Colanderfile` will run [foodcritic](https://github.com/acrmp/foodcritic) a
 
 To strain, simply run the `strain` command and pass in the cookbooks to strain:
 
-    # strain phantomjs and tmux
-    bundle exec strain phantomjs tmux
+    # strains phantomjs and tmux
+    $ bundle exec strain phantomjs tmux
 
 This will run `knife test` and `foodcritic` against both of the cookbooks. You can pass in as many cookbooks are you'd like.
+
+As of `v0.0.3`, there's an option for `--fail-fast` that will fail immediately when any strain command returns a non-zero exit code:
+
+    $ bundle exec strain phantomjs --fail-fast
 
 Needs Your Help
 ---------------
