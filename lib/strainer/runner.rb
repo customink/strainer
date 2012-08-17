@@ -11,9 +11,9 @@ module Strainer
 
       @cookbooks.each do |cookbook|
         $stdout.puts
-        $stdout.puts Color.negative{ "# Straining '#{cookbook}'" }.to_s
+        $stdout.puts Color.negative{ "# Straining '#{cookbook.name}'" }
 
-        commands_for(cookbook).collect do |command|
+        commands_for(cookbook.name.to_s).collect do |command|
           success &= run(command)
 
           if fail_fast? && !success
@@ -30,11 +30,11 @@ module Strainer
     end
 
     private
-    def commands_for(cookbook)
-      file = File.read( colanderfile_for(cookbook) )
+    def commands_for(cookbook_name)
+      file = File.read( colanderfile_for(cookbook_name) )
 
       file = file.strip
-      file = file.gsub('$COOKBOOK', cookbook)
+      file = file.gsub('$COOKBOOK', cookbook_name)
       file = file.gsub('$SANDBOX', @sandbox.sandbox_path)
 
       lines = file.split("\n").reject{|c| c.strip.empty?}.compact
@@ -52,8 +52,8 @@ module Strainer
       end || []
     end
 
-    def colanderfile_for(cookbook)
-      cookbook_level = File.join(@sandbox.sandbox_path(cookbook), 'Colanderfile')
+    def colanderfile_for(cookbook_name)
+      cookbook_level = File.join(@sandbox.sandbox_path(cookbook_name), 'Colanderfile')
       root_level = File.expand_path('Colanderfile')
 
       if File.exists?(cookbook_level)

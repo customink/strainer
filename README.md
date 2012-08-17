@@ -30,11 +30,15 @@ To strain, simply run the `strain` command and pass in the cookbooks to strain:
     # strains phantomjs and tmux
     $ bundle exec strain phantomjs tmux
 
-This will run `knife test` and `foodcritic` against both of the cookbooks. You can pass in as many cookbooks are you'd like.
+This will first detect the cookbook dependencies, copy the cookbook and all dependencies into a sandbox. Then `knife test` and `foodcritic` will be run against both of the cookbooks. You can pass in as many cookbooks as you'd like.
 
-As of `v0.0.3`, there's an option for `--fail-fast` that will fail immediately when any strain command returns a non-zero exit code:
+Failing Quickly
+---------------
+As of `v0.0.4`, there's an option for `--fail-fast` that will fail immediately when any strain command returns a non-zero exit code:
 
     $ bundle exec strain phantomjs --fail-fast
+
+This can save time, especially when running tests locally. This is *not* recommended on continuous integration.
 
 Custom Foodcritic Rules
 -----------------------
@@ -50,4 +54,3 @@ Needs Your Help
 This is a list of features or problem *you* can help solve! Fork and submit a pull request to make Strain even better!
 
 - **Threading** - Run each cookbook's tests (or each cookbook tests test) in a separate thread
-- **Dependencies** - Auto-detect dependent cookbooks and copy them over
