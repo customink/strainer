@@ -1,5 +1,5 @@
 Gem::Specification.new do |gem|
-  gem.version       = '0.0.3'
+  gem.version       = '0.0.4'
   gem.authors       = ['Seth Vargo']
   gem.email         = ['sethvargo@gmail.com']
   gem.description   = %q{Run isolated cookbook tests against your chef repository with Strainer.}

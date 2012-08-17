@@ -5,12 +5,16 @@ module Strainer
       @cookbooks = @sandbox.cookbooks
       @options = options
 
+      # need a variable at the root level to track whether the
+      # build actually passed
+      success = true
+
       @cookbooks.each do |cookbook|
         $stdout.puts
         $stdout.puts Color.negative{ "# Straining '#{cookbook}'" }.to_s
 
         commands_for(cookbook).collect do |command|
-          success = run(command)
+          success &= run(command)
 
           if fail_fast? && !success
             $stdout.puts [ label_with_padding(command[:label]), Color.red{ 'Exited early because --fail-fast was specified. Some tests may have been skipped!' } ].join(' ')
@@ -20,6 +24,9 @@ module Strainer
 
         $stdout.puts
       end
+
+      # fail unless all commands returned successfully
+      abort unless success
     end
 
     private
