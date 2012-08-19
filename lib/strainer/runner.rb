@@ -76,22 +76,24 @@ module Strainer
     end
 
     def run(command)
-      label = command[:label]
-      command = command[:command]
+      Dir.chdir('.colander') do
+        label = command[:label]
+        command = command[:command]
 
-      $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ command } } ].join(' ')
+        $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ command } } ].join(' ')
 
-      result = format(label, `(cd #{@sandbox.sandbox_path} && #{command})`)
-      $stdout.puts result unless result.strip.empty?
+        result = format(label, `#{command}`)
+        $stdout.puts result unless result.strip.empty?
 
-      if $?.success?
-        $stdout.puts format(label, Color.green{'Success!'})
-        $stdout.flush
-        true
-      else
-        $stdout.puts format(label, Color.red{'Failure!'})
-        $stdout.flush
-        false
+        if $?.success?
+          $stdout.puts format(label, Color.green{'Success!'})
+          $stdout.flush
+          return true
+        else
+          $stdout.puts format(label, Color.red{'Failure!'})
+          $stdout.flush
+          return false
+        end
       end
     end
 

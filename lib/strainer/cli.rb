@@ -18,7 +18,7 @@ module Strainer
           @options[:fail_fast] = ff
         end
 
-        options.on nil, '--cookbooks-path PATH', 'Path to the cookbooks' do |cp|
+        options.on '-p PATH', '--cookbooks-path PATH', 'Path to the cookbooks' do |cp|
           @options[:cookbooks_path] = cp
         end
 

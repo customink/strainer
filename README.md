@@ -14,7 +14,7 @@ Next, create a `Colanderfile`. Cookbook-level Colanderfiles will take precedence
 
     # Colanderfile
     knife test: bundle exec knife cookbook test $COOKBOOK
-    foodcritic: bundle exec foodcritic -f any $COOKBOOK
+    foodcritic: bundle exec foodcritic -f any cookbooks/$COOKBOOK
 
 `Colanderfile` exposes two variables:
 
@@ -25,12 +25,42 @@ Just like foreman, the labels don't actually matter - they are only used in form
 
 That `Colanderfile` will run [foodcritic](https://github.com/acrmp/foodcritic) and knife test. I recommend this as the bare minimum for a cookbook test.
 
-To strain, simply run the `strain` command and pass in the cookbooks to strain:
+`Colanderfile`s commands are run in the context to the sandbox `.colander` directory. The sandbox is essentially a clone of your working directory. This can be a bit confusing. `knife cookbook test` requires that you run your command against the "root" directory, yet foodcrtitic and chefspec require you run inside an actual cookbook. Here's a quick example to clear up some confusion:
 
-    # strains phantomjs and tmux
+    # Colanderfile
+    knife test: bundle exec knife cookbook test $COOKBOOK
+    foodcritic: bundle exec foodcritic -f any $SANDBOX/$COOKBOOK
+    chefspec: bundle exec rspec $SANDBOX/$COOKBOOK
+
+To strain, simply run the `strain` command and pass in the cookbook(s) to strain:
+
     $ bundle exec strain phantomjs tmux
 
-This will first detect the cookbook dependencies, copy the cookbook and all dependencies into a sandbox. Then `knife test` and `foodcritic` will be run against both of the cookbooks. You can pass in as many cookbooks as you'd like.
+This will first detect the cookbook dependencies, copy the cookbook and all dependencies into a sandbox. It will execute the contents of the `Colanderfile` on each cookbook.
+
+Using Berkshelf
+---------------
+[Berkshelf](http://berkshelf.com/) is a tool for managing multiple cookbooks. It works very similar to how a `Gemfile` works with Rubygems.
+
+You'll need to install Berkshelf shims in order to use strainer with Berkshelf. Essentially the shims install (hardlink) the files into your local repository. This way, strainer can actually find them.
+
+    $ bundle exec berks install --shims
+
+By default, that will install your cookbooks into the `cookbooks` directory. If you want to use another directory, specify it as an argument:
+
+    $ bundle exec berks install --shims berks-cookbooks
+
+Finally, make sure that this path is **first** in your `.chef/knife.rb` file:
+
+```ruby
+# .chef/knife.rb
+current_dir = File.dirname(__FILE__)
+cookbook_path ["#{current_dir}/../berks-cookbooks", "#{current_dir}/../cookbooks"]
+```
+
+Or pass it as an argument to the `strain` command:
+
+    $ bundle exec strain phantomjs --cookbooks-path berks-cookbooks
 
 Failing Quickly
 ---------------

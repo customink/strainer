@@ -1,4 +1,5 @@
 require 'chef'
+require 'chef/knife'
 require 'fileutils'
 
 module Strainer
@@ -38,7 +39,7 @@ module Strainer
     end
 
     def cookbooks_path
-      @cookbooks_path ||= (@options[:cookbooks_path] || File.expand_path('cookbooks'))
+      @cookbooks_path ||= @options[:cookbooks_path] || ( File.exists?(knife_rb_path) ? (Chef::Config.from_file(knife_rb_path) && Chef::Config.cookbook_path.compact ) : nil) || File.expand_path('cookbooks')
     end
 
     def clear_sandbox
@@ -77,6 +78,10 @@ EOH
 
       # create knife.rb
       File.open("#{chef_path}/knife.rb", 'w+'){ |f| f.write(contents) }
+    end
+
+    def knife_rb_path
+      File.join(Chef::Knife.chef_config_dir, 'knife.rb')
     end
 
     # Iterate over the cookbook's dependencies and ensure those cookbooks are
