@@ -74,10 +74,10 @@ Custom Foodcritic Rules
 -----------------------
 I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
 
-Strainer runs everything in an isolated sandbox, inside your Chef Repo. The root of your Chef Repo is two folders above the sandbox environment. This means, when including additional foodcritic rules, you need to do something like this:
+Strainer runs everything in an isolated sandbox, inside your Chef Repo. When including additional foodcritic rules, you need to do something like this:
 
     # Colanderfile
-    foodcritic: bundle exec foodcritic -I ../../foodcritic/* -f any $COOKBOOK
+    foodcritic: bundle exec foodcritic -I foodcritic/* -f any $SANDBOX/$COOKBOOK
 
 Needs Your Help
 ---------------

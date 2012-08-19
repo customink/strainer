@@ -55,7 +55,7 @@ module Strainer
     end
 
     def copy_globals
-      files = %w(.rspec spec test)
+      files = %w(.rspec spec test foodcritic)
       FileUtils.cp_r( Dir["{#{files.join(',')}}"], sandbox_path('..') )
     end
 
