@@ -20,7 +20,7 @@ module Strainer
     end
 
     def sandbox_path(cookbook = nil)
-      File.expand_path( File.join(%W(colander cookbooks #{cookbook.is_a?(::Chef::CookbookVersion) ? cookbook.name : cookbook})) )
+      File.expand_path( File.join(%W(.colander cookbooks #{cookbook.is_a?(::Chef::CookbookVersion) ? cookbook.name : cookbook})) )
     end
 
     private

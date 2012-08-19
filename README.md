@@ -6,9 +6,9 @@ Usage
 -----
 Strainer is a command line tool. The first thing you should do is add the following entry into your `.gitignore` and `chefignore` files:
 
-    colander
+    .colander
 
-The `colander` is where strainer puts all your temporary files for testing.
+The `.colander` directory is where strainer puts all your temporary files for testing. You should not commit it to source control, nor should you upload it if sharing this cookbook with the community.
 
 Next, create a `Colanderfile`. Cookbook-level Colanderfiles will take precedence over root-level ones. For simplicity, let's just create one in the root of our chef repository:
 
