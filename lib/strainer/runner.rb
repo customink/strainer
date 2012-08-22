@@ -79,8 +79,16 @@ module Strainer
       Dir.chdir('.colander') do
         label = command[:label]
         command = command[:command]
+        pretty_command = begin
+          split = command.split(' ')
+          path = split.pop
+          short_path = path.split('.colander').last[1..-1]
 
-        $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ command } } ].join(' ')
+          split.push short_path
+          split.join(' ')
+        end
+
+        $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ pretty_command } } ].join(' ')
 
         result = format(label, `#{command}`)
         $stdout.puts result unless result.strip.empty?
