@@ -82,7 +82,12 @@ module Strainer
         pretty_command = begin
           split = command.split(' ')
           path = split.pop
-          short_path = path.split('.colander').last[1..-1]
+
+          if path =~ /\.colander/
+            short_path = path.split('.colander').last[1..-1]
+          else
+            short_path = path
+          end
 
           split.push short_path
           split.join(' ')

@@ -15,9 +15,18 @@ module Strainer
     end
 
     def cookbook_path(cookbook)
-      path = File.join(cookbooks_path, cookbook.name.to_s)
-      raise "cookbook '#{cookbook}' was not found in #{cookbooks_path}" unless File.exists?(path)
-      return path
+      found_paths = cookbooks_path.select{ |path| File.exists?( File.join(path, cookbook.name.to_s) ) }
+
+      if found_paths.empty?
+        puts Color.red { "Cookbook '#{cookbook.name}' was not found in #{cookbooks_path}" }
+        exit(1)
+      elsif found_paths.size > 1
+        puts Color.yellow { "Cookbook '#{cookbook.name}' was found in multiple paths: #{found_paths}." }
+        puts Color.yellow { 'Strainer can only handle one cookbook per path at this time. Pull requests are welcome :)' }
+        exit(1)
+      end
+
+      return File.join(found_paths[0], cookbook.name.to_s)
     end
 
     def sandbox_path(cookbook = nil)
@@ -39,7 +48,7 @@ module Strainer
     end
 
     def cookbooks_path
-      @cookbooks_path ||= @options[:cookbooks_path] || ( File.exists?(knife_rb_path) ? (Chef::Config.from_file(knife_rb_path) && Chef::Config.cookbook_path.compact ) : nil) || File.expand_path('cookbooks')
+      @cookbooks_path ||= [@options[:cookbooks_path] || ( File.exists?(knife_rb_path) ? (Chef::Config.from_file(knife_rb_path) && Chef::Config.cookbook_path.compact ) : nil) || File.expand_path('cookbooks')].flatten.collect{ |p| File.expand_path(p) }
     end
 
     def clear_sandbox
