@@ -37,7 +37,8 @@ module Strainer
       file = file.gsub('$COOKBOOK', cookbook_name)
       file = file.gsub('$SANDBOX', @sandbox.sandbox_path)
 
-      lines = file.split("\n").reject{|c| c.strip.empty?}.compact
+      # drop empty lines and comments
+      lines = file.split("\n").reject{|c| c.strip.empty? || c.start_with?('#')}.compact
 
       # parse the line and split it into the label and command parts
       #
