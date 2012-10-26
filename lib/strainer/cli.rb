@@ -5,8 +5,12 @@ module Strainer
     def self.run(*args)
       parse_options(*args)
 
-      @sandbox = Strainer::Sandbox.new(@cookbooks, @options)
-      @runner = Strainer::Runner.new(@sandbox, @options)
+      if @cookbooks.empty?
+        puts Color.red { 'ERROR: You did not specify any cookbooks!' }
+      else
+        @sandbox = Strainer::Sandbox.new(@cookbooks, @options)
+        @runner = Strainer::Runner.new(@sandbox, @options)
+      end
     end
 
     private
@@ -14,6 +18,9 @@ module Strainer
       @options = {}
 
       parser = OptionParser.new do |options|
+        # remove OptionParsers Officious['version'] to avoid conflicts
+        options.base.long.delete('version')
+
         options.on nil, '--fail-fast', 'Fail fast' do |ff|
           @options[:fail_fast] = ff
         end
@@ -22,8 +29,15 @@ module Strainer
           @options[:cookbooks_path] = cp
         end
 
-        options.on '-h', '--help', 'Display this help screen' do |h|
+        options.on '-h', '--help', 'Display this help screen' do
           puts options
+          exit 0
+        end
+
+        options.on '-v', '--version', 'Display the current version' do
+          require 'strainer/version'
+          puts Strainer::VERSION
+          exit 0
         end
       end
 
