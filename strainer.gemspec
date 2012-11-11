@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.name          = 'strainer'
   gem.require_paths = ['lib']
 
-  gem.add_runtime_dependency 'chef', '~> 10.16.2'
+  gem.add_runtime_dependency 'chef', '>= 10.10'
   gem.add_runtime_dependency 'term-ansicolor', '~> 1.0.7'
 
   gem.add_development_dependency 'yard', '~> 0.8.3'
