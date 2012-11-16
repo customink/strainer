@@ -11,9 +11,9 @@ module Strainer
 
       @cookbooks.each do |cookbook|
         $stdout.puts
-        $stdout.puts Color.negative{ "# Straining '#{cookbook.name}'" }
+        $stdout.puts Color.negative{ "# Straining '#{cookbook.cookbook_name} (v#{cookbook.version})'" }
 
-        commands_for(cookbook.name.to_s).collect do |command|
+        commands_for(cookbook.cookbook_name).collect do |command|
           success &= run(command)
 
           if fail_fast? && !success

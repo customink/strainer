@@ -30,14 +30,14 @@ module Strainer
         end
 
         options.on '-h', '--help', 'Display this help screen' do
-          puts options
-          exit 0
+          $stdout.puts options
+          exit(0)
         end
 
         options.on '-v', '--version', 'Display the current version' do
           require 'strainer/version'
-          puts Strainer::VERSION
-          exit 0
+          $stdout.puts Strainer::VERSION
+          exit(0)
         end
       end
 
