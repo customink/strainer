@@ -5,6 +5,16 @@ require 'fileutils'
 
 module Strainer
   class Sandbox
+    class << self
+      def path
+        @@path ||= File.expand_path( File.join('.colander') )
+      end
+
+      def cookbook_path(*extra)
+        File.expand_path( File.join( Sandbox.path, 'cookbooks', extra ) )
+      end
+    end
+
     attr_reader :cookbooks, :options
 
     def initialize(cookbook_names = [], options = {})
@@ -33,10 +43,6 @@ module Strainer
       cookbook
     end
 
-    def sandbox_path(cookbook = nil)
-      File.expand_path( File.join(%W(.colander cookbooks #{cookbook.is_a?(::Chef::CookbookVersion) ? cookbook.name : cookbook})) )
-    end
-
     private
     def cookbooks_path
       @cookbooks_path ||= [
@@ -51,11 +57,11 @@ module Strainer
     end
 
     def clear_sandbox
-      FileUtils.rm_rf(sandbox_path)
+      FileUtils.rm_rf(Sandbox.path)
     end
 
     def create_sandbox
-      FileUtils.mkdir_p(sandbox_path)
+      FileUtils.mkdir_p(Sandbox.cookbook_path)
 
       copy_globals
       copy_cookbooks
@@ -64,24 +70,24 @@ module Strainer
 
     def copy_globals
       files = %w(.rspec spec test foodcritic)
-      FileUtils.cp_r( Dir["{#{files.join(',')}}"], sandbox_path('..') )
+      FileUtils.cp_r( Dir["{#{files.join(',')}}"], Sandbox.path )
     end
 
     def copy_cookbooks
       cookbooks_and_dependencies.each do |cookbook|
-        FileUtils.cp_r(cookbook.path, "#{sandbox_path}/#{cookbook.cookbook_name}")
+        FileUtils.cp_r(cookbook.path, File.join(Sandbox.cookbook_path, cookbook.cookbook_name))
       end
     end
 
     def place_knife_rb
-      chef_path = File.join(sandbox_path, '..','.chef')
+      chef_path = File.join(Sandbox.path, '.chef')
       FileUtils.mkdir_p(chef_path)
 
       # build the contents
       contents = <<-EOH
 cache_type 'BasicFile'
 cache_options(:path => "\#{ENV['HOME']}/.chef/checksums")
-cookbook_path '#{sandbox_path}'
+cookbook_path '#{Sandbox.cookbook_path}'
 EOH
 
       # create knife.rb

@@ -14,7 +14,7 @@ module Strainer
         $stdout.puts Color.negative{ "# Straining '#{cookbook.cookbook_name} (v#{cookbook.version})'" }
 
         commands_for(cookbook.cookbook_name).collect do |command|
-          success &= run(command)
+          success &= run(command, cookbook)
 
           if fail_fast? && !success
             $stdout.puts [ label_with_padding(command[:label]), Color.red{ 'Exited early because --fail-fast was specified. Some tests may have been skipped!' } ].join(' ')
@@ -35,7 +35,7 @@ module Strainer
 
       file = file.strip
       file = file.gsub('$COOKBOOK', cookbook_name)
-      file = file.gsub('$SANDBOX', @sandbox.sandbox_path)
+      file = file.gsub('$SANDBOX', Sandbox.cookbook_path)
 
       # drop empty lines and comments
       lines = file.split("\n").reject{|c| c.strip.empty? || c.start_with?('#')}.compact
@@ -54,7 +54,7 @@ module Strainer
     end
 
     def colanderfile_for(cookbook_name)
-      cookbook_level = File.join(@sandbox.sandbox_path(cookbook_name), 'Colanderfile')
+      cookbook_level = File.join(Sandbox.cookbook_path(cookbook_name), 'Colanderfile')
       root_level = File.expand_path('Colanderfile')
 
       if File.exists?(cookbook_level)
@@ -76,7 +76,7 @@ module Strainer
       end
     end
 
-    def run(command)
+    def run(command, cookbook)
       Dir.chdir('.colander') do
         label = command[:label]
         command = command[:command]
@@ -96,23 +96,25 @@ module Strainer
 
         $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ pretty_command } } ].join(' ')
 
-        result = format(label, `#{command}`)
+        result = format(label, `#{command}`, cookbook)
         $stdout.puts result unless result.strip.empty?
 
         if $?.success?
-          $stdout.puts format(label, Color.green{'Success!'})
+          $stdout.puts format(label, Color.green{'Success!'}, cookbook)
           $stdout.flush
           return true
         else
-          $stdout.puts format(label, Color.red{'Failure!'})
+          $stdout.puts format(label, Color.red{'Failure!'}, cookbook)
           $stdout.flush
           return false
         end
       end
     end
 
-    def format(label, data)
+    def format(label, data, cookbook)
       data.to_s.strip.split("\n").collect do |line|
+        line.gsub! Sandbox.cookbook_path(cookbook.cookbook_name).to_s, cookbook.path.to_s
+
         if %w(fatal error alert).any?{ |e| line =~ /^#{e}/i }
           [ label_with_padding(label), Color.red{ line } ].join(' ')
         elsif %w(warn).any?{ |e| line =~ /^#{e}/i }
