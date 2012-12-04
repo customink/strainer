@@ -72,7 +72,7 @@ This can save time, especially when running tests locally. This is *not* recomme
 
 Custom Foodcritic Rules
 -----------------------
-I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
+I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink-webops/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
 
 Strainer runs everything in an isolated sandbox, inside your Chef Repo. When including additional foodcritic rules, you need to do something like this:
 
