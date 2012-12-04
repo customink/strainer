@@ -42,13 +42,11 @@ Using Berkshelf
 ---------------
 [Berkshelf](http://berkshelf.com/) is a tool for managing multiple cookbooks. It works very similar to how a `Gemfile` works with Rubygems.
 
-You'll need to install Berkshelf shims in order to use strainer with Berkshelf. Essentially the shims install (hardlink) the files into your local repository. This way, strainer can actually find them.
+You'll need to tell Berkshelf to install the cookbooks to a folder inside your local repository. This way, strainer can actually find them.
 
-    $ bundle exec berks install --shims
+For example, this will install your cookbooks into the `berks-cookbooks` directory:
 
-By default, that will install your cookbooks into the `cookbooks` directory. If you want to use another directory, specify it as an argument:
-
-    $ bundle exec berks install --shims berks-cookbooks
+    $ bundle exec berks install --path berks-cookbooks
 
 Finally, make sure that this path is **first** in your `.chef/knife.rb` file:
 
@@ -72,7 +70,7 @@ This can save time, especially when running tests locally. This is *not* recomme
 
 Custom Foodcritic Rules
 -----------------------
-I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
+I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink-webops/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
 
 Strainer runs everything in an isolated sandbox, inside your Chef Repo. When including additional foodcritic rules, you need to do something like this:
 
