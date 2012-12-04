@@ -42,13 +42,11 @@ Using Berkshelf
 ---------------
 [Berkshelf](http://berkshelf.com/) is a tool for managing multiple cookbooks. It works very similar to how a `Gemfile` works with Rubygems.
 
-You'll need to install Berkshelf shims in order to use strainer with Berkshelf. Essentially the shims install (hardlink) the files into your local repository. This way, strainer can actually find them.
+You'll need to tell Berkshelf to install the cookbooks to a folder inside your local repository. This way, strainer can actually find them.
 
-    $ bundle exec berks install --shims
+For example, this will install your cookbooks into the `berks-cookbooks` directory:
 
-By default, that will install your cookbooks into the `cookbooks` directory. If you want to use another directory, specify it as an argument:
-
-    $ bundle exec berks install --shims berks-cookbooks
+    $ bundle exec berks install --path berks-cookbooks
 
 Finally, make sure that this path is **first** in your `.chef/knife.rb` file:
 
