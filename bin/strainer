@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+$:.unshift File.expand_path('../lib', __FILE__)
+require 'strainer'
+
+begin
+  Strainer::Cli.start
+rescue Strainer::Error::Base => e
+  Strainer.ui.error "#{e.class} - #{e}"
+  Strainer.ui.error "  #{e.backtrace.join("\n  ")}" if ENV['DEBUG']
+  exit e.status_code
+end

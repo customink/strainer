@@ -1,132 +1,87 @@
 module Strainer
+  # The Runner class is responsible for executing the tests against cookbooks.
+  #
+  # @author Seth Vargo <sethvargo@gmail.com>
   class Runner
-    def initialize(sandbox, options = {})
-      @sandbox = sandbox
-      @cookbooks = @sandbox.cookbooks
-      @options = options
+    # List taken from: http://wiki.opscode.com/display/chef/Chef+Configuration+Settings
+    # Listed in order of preferred preference
+    KNIFE_LOCATIONS = [
+      './.chef/knife.rb',
+      '~/.chef/knife.rb',
+      '/etc/chef/solo.rb',
+      '/etc/chef/client.rb'
+    ].freeze
 
-      # need a variable at the root level to track whether the
-      # build actually passed
-      success = true
+    class << self
+      # Perform a smart search for knife.rb chef configuration file
+      #
+      # @return [Pathname]
+      #   the path to the chef configuration
+      def chef_config_path
+        @chef_config_path ||= begin
+          location = KNIFE_LOCATIONS.find{ |location| File.exists?(File.expand_path(location)) }
+          location ||= '~/.chef/knife.rb'
+
+          Pathname.new(File.expand_path(location))
+        end
+      end
+
+      # Set the chef_config_path
+      #
+      # @param [String] path
+      #   the path to the config file
+      # @return [Pathname]
+      #   the supplied string as a Pathname
+      def chef_config_path=(path)
+        @chef_config = nil
+        @chef_config_path = Pathname.new(path)
+        @chef_config_path
+      end
+
+      # Get the best chef configuration
+      #
+      # @return [Chef::Config]
+      #   a chef configuration
+      def chef_config
+        @chef_config ||= begin
+          Chef::Config.from_file(chef_config_path)
+          Chef::Config
+        rescue
+          Chef::Config
+        end
+      end
+    end
+
+    # Creates a Strainer runner
+    #
+    # @param [Array<String>] cookbook_names
+    #   an array of cookbook_names to test and load into the sandbox
+    # @param [Hash] options
+    #   a list of options to pass along
+    def initialize(cookbook_names, options = {})
+      @options   = options
+      @sandbox   = Strainer::Sandbox.new(cookbook_names, @options)
+      @cookbooks = @sandbox.cookbooks
+      @report    = {}
 
       @cookbooks.each do |cookbook|
-        $stdout.puts
-        $stdout.puts Color.negative{ "# Straining '#{cookbook.name}'" }
+        strainerfile = Strainer::Strainerfile.for(cookbook, options)
+        Strainer.ui.header("# Straining '#{cookbook.cookbook_name} (v#{cookbook.version})'")
 
-        commands_for(cookbook.name.to_s).collect do |command|
-          success &= run(command)
+        strainerfile.commands.each do |command|
+          success = command.run!
 
-          if fail_fast? && !success
-            $stdout.puts [ label_with_padding(command[:label]), Color.red{ 'Exited early because --fail-fast was specified. Some tests may have been skipped!' } ].join(' ')
+          @report[cookbook.cookbook_name] ||= {}
+          @report[cookbook.cookbook_name][command.label] = success
+
+          if @options[:fail_fast] && !success
+            Strainer.ui.fatal "Exited early because '--fail-fast' was specified. Some tests may have been skipped!"
             abort
           end
         end
-
-        $stdout.puts
       end
 
-      # fail unless all commands returned successfully
-      abort unless success
-    end
-
-    private
-    def commands_for(cookbook_name)
-      file = File.read( colanderfile_for(cookbook_name) )
-
-      file = file.strip
-      file = file.gsub('$COOKBOOK', cookbook_name)
-      file = file.gsub('$SANDBOX', @sandbox.sandbox_path)
-
-      # drop empty lines and comments
-      lines = file.split("\n").reject{|c| c.strip.empty? || c.start_with?('#')}.compact
-
-      # parse the line and split it into the label and command parts
-      #
-      # example line: foodcritic -f any phantomjs
-      lines.collect do |line|
-        split_line = line.split(':', 2)
-
-        {
-          :label => split_line[0].strip,
-          :command => split_line[1].strip
-        }
-      end || []
-    end
-
-    def colanderfile_for(cookbook_name)
-      cookbook_level = File.join(@sandbox.sandbox_path(cookbook_name), 'Colanderfile')
-      root_level = File.expand_path('Colanderfile')
-
-      if File.exists?(cookbook_level)
-        cookbook_level
-      elsif File.exists?(root_level)
-        root_level
-      else
-        raise "Could not find Colanderfile in #{cookbook_level} or #{root_level}"
-      end
-    end
-
-    def label_with_padding(label)
-      max_length = 12
-      colors = [ :blue, :cyan, :magenta, :yellow ]
-      color = colors[label.length%colors.length]
-
-      Color.send(color) do
-        "#{label[0...max_length].ljust(max_length)} | "
-      end
-    end
-
-    def run(command)
-      Dir.chdir('.colander') do
-        label = command[:label]
-        command = command[:command]
-        pretty_command = begin
-          split = command.split(' ')
-          path = split.pop
-
-          if path =~ /\.colander/
-            short_path = path.split('.colander').last[1..-1]
-          else
-            short_path = path
-          end
-
-          split.push short_path
-          split.join(' ')
-        end
-
-        $stdout.puts [ label_with_padding(label), Color.bold{ Color.underscore{ pretty_command } } ].join(' ')
-
-        result = format(label, `#{command}`)
-        $stdout.puts result unless result.strip.empty?
-
-        if $?.success?
-          $stdout.puts format(label, Color.green{'Success!'})
-          $stdout.flush
-          return true
-        else
-          $stdout.puts format(label, Color.red{'Failure!'})
-          $stdout.flush
-          return false
-        end
-      end
-    end
-
-    def format(label, data)
-      data.to_s.strip.split("\n").collect do |line|
-        if %w(fatal error alert).any?{ |e| line =~ /^#{e}/i }
-          [ label_with_padding(label), Color.red{ line } ].join(' ')
-        elsif %w(warn).any?{ |e| line =~ /^#{e}/i }
-          [ label_with_padding(label), Color.yellow{ line } ].join(' ')
-        elsif %w(info debug).any?{ |e| line =~ /^#{e}/i }
-          [ label_with_padding(label), Color.cyan{ line } ].join(' ')
-        else
-          [ label_with_padding(label), line ].join(' ')
-        end
-      end.join("\n")
-    end
-
-    def fail_fast?
-      @options[:fail_fast]
+      abort unless @report.values.collect(&:values).flatten.all?{|v| v == true}
     end
   end
 end

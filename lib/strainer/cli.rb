@@ -1,52 +1,39 @@
-require 'optparse'
+require 'strainer'
 
 module Strainer
-  class CLI
-    def self.run(*args)
-      parse_options(*args)
+  # Use our own custom shell
+  Thor::Base.shell = Strainer::UI
 
-      if @cookbooks.empty?
-        puts Color.red { 'ERROR: You did not specify any cookbooks!' }
-      else
-        @sandbox = Strainer::Sandbox.new(@cookbooks, @options)
-        @runner = Strainer::Runner.new(@sandbox, @options)
-      end
+  # Cli runner for Strainer
+  #
+  # @author Seth Vargo <sethvargo@gmail.com>
+  class Cli < Thor
+    # global options
+    map ['-v', '--version'] => :version
+    class_option :cookbooks_path, :type => :string,  :aliases => '-p', :desc => 'The path to the cookbook store', :banner => 'PATH'
+    class_option :config,         :type => :string,  :aliases => '-c', :desc => 'The path to the knife.rb config'
+
+    # strainer test *COOKBOOKS
+    method_option :except,        :type => :array,   :aliases => '-e', :desc => 'Strainerfile labels to ignore'
+    method_option :only,          :type => :array,   :aliases => '-o', :desc => 'Strainerfile labels to include'
+    method_option :fail_fast,     :type => :boolean, :aliases => '-x', :desc => 'Stop termination immediately if a test fails', :banner => '', :default => false
+    desc 'test [COOKBOOKS]', 'Run tests against the given cookbooks'
+    def test(*cookbooks)
+      Strainer::Runner.new(cookbooks, options)
     end
 
-    private
-    def self.parse_options(*args)
-      @options = {}
+    # strainer info
+    desc 'info', 'Display version and copyright information'
+    def info
+      Strainer.ui.info "Strainer (#{Strainer::VERSION})"
+      Strainer.ui.info "\n"
+      Strainer.ui.info File.read Strainer.root.join('LICENSE')
+    end
 
-      parser = OptionParser.new do |options|
-        # remove OptionParsers Officious['version'] to avoid conflicts
-        options.base.long.delete('version')
-
-        options.on nil, '--fail-fast', 'Fail fast' do |ff|
-          @options[:fail_fast] = ff
-        end
-
-        options.on '-p PATH', '--cookbooks-path PATH', 'Path to the cookbooks' do |cp|
-          @options[:cookbooks_path] = cp
-        end
-
-        options.on '-h', '--help', 'Display this help screen' do
-          puts options
-          exit 0
-        end
-
-        options.on '-v', '--version', 'Display the current version' do
-          require 'strainer/version'
-          puts Strainer::VERSION
-          exit 0
-        end
-      end
-
-      # Get the cookbook names. The options that aren't read by optparser are assummed
-      # to be cookbooks in this case.
-      @cookbooks = []
-      parser.order!(args) do |noopt|
-        @cookbooks << noopt
-      end
+    # strainer -v
+    desc 'version', 'Display the version information', hide: true
+    def version
+      Strainer.ui.info Strainer::VERSION
     end
   end
 end

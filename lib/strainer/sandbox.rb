@@ -1,117 +1,156 @@
-require 'chef'
-require 'chef/knife'
-require 'fileutils'
-
 module Strainer
+  # Manages the Strainer sandbox (playground) for isolated testing.
+  #
+  # @author Seth Vargo <sethvargo@gmail.com>
   class Sandbox
+    # The path to the testing sandbox inside the gem.
+    SANDBOX = Strainer.root.join('sandbox').freeze
+
+    # @return [Array<Berkshelf::CachedCookbook>]
+    #   an array of cookbooks in this sandbox
     attr_reader :cookbooks
 
-    def initialize(cookbooks = [], options = {})
-      @options = options
-      @cookbooks = load_cookbooks([cookbooks].flatten)
+    # Create a new sandbox for the given cookbooks
+    #
+    # @param [Array<String>] cookbook_names
+    #   the list of cookbooks to copy into the sandbox
+    # @param [Hash] options
+    #   a list of options to pass along
+    def initialize(cookbook_names, options = {})
+      @options   = options
+      @cookbooks = load_cookbooks(cookbook_names)
 
-      clear_sandbox
+      reset_sandbox
+      copy_cookbooks
+    end
+
+    # Clear out the existing sandbox and create the directories
+    def reset_sandbox
+      destroy_sandbox
       create_sandbox
     end
 
-    def cookbook_path(cookbook)
-      found_paths = cookbooks_path.select{ |path| File.exists?( File.join(path, cookbook.name.to_s) ) }
-
-      if found_paths.empty?
-        puts Color.red { "Cookbook '#{cookbook.name}' was not found in #{cookbooks_path}" }
-        exit(1)
-      elsif found_paths.size > 1
-        puts Color.yellow { "Cookbook '#{cookbook.name}' was found in multiple paths: #{found_paths}." }
-        puts Color.yellow { 'Strainer can only handle one cookbook per path at this time. Pull requests are welcome :)' }
-        exit(1)
-      end
-
-      return File.join(found_paths[0], cookbook.name.to_s)
+    # Destroy the current sandbox, if it exists
+    def destroy_sandbox
+      FileUtils.rm_rf(SANDBOX) if File.directory?(SANDBOX)
     end
 
-    def sandbox_path(cookbook = nil)
-      File.expand_path( File.join(%W(.colander cookbooks #{cookbook.is_a?(::Chef::CookbookVersion) ? cookbook.name : cookbook})) )
-    end
-
-    private
-    # Load a specific cookbook by name
-    def load_cookbook(cookbook_name)
-      return cookbook_name if cookbook_name.is_a?(::Chef::CookbookVersion)
-      loader = ::Chef::CookbookLoader.new(cookbooks_path)
-      loader[cookbook_name]
-    end
-
-    # Load an array of cookbooks by name
-    def load_cookbooks(cookbook_names)
-      cookbook_names = [cookbook_names].flatten
-      cookbook_names.collect{ |cookbook_name| load_cookbook(cookbook_name) }
-    end
-
-    def cookbooks_path
-      @cookbooks_path ||= [@options[:cookbooks_path] || ( File.exists?(knife_rb_path) ? (Chef::Config.from_file(knife_rb_path) && Chef::Config.cookbook_path.compact ) : nil) || File.expand_path('cookbooks')].flatten.collect{ |p| File.expand_path(p) }
-    end
-
-    def clear_sandbox
-      FileUtils.rm_rf(sandbox_path)
-    end
-
+    # Create the sandbox unless it already exits
     def create_sandbox
-      FileUtils.mkdir_p(sandbox_path)
-
-      copy_globals
-      copy_cookbooks
-      place_knife_rb
-    end
-
-    def copy_globals
-      files = %w(.rspec spec test foodcritic)
-      FileUtils.cp_r( Dir["{#{files.join(',')}}"], sandbox_path('..') )
-    end
-
-    def copy_cookbooks
-      (cookbooks + cookbooks_dependencies).each do |cookbook|
-        FileUtils.cp_r(cookbook_path(cookbook), sandbox_path)
+      unless File.directory?(SANDBOX)
+        FileUtils.mkdir_p(SANDBOX)
+        copy_globals
+        place_knife_rb
       end
     end
 
+    # Copy over a whitelist of common files into our sandbox
+    def copy_globals
+      files = Dir[*%W(#{Strainer.strainerfile_name} foodcritic .rspec spec test)]
+      FileUtils.cp_r(files, SANDBOX)
+    end
+
+    # Create a basic knife.rb file to ensure tests run successfully
     def place_knife_rb
-      chef_path = File.join(sandbox_path, '..','.chef')
+      chef_path = SANDBOX.join('.chef')
       FileUtils.mkdir_p(chef_path)
 
-      # build the contents
+      # Build the contents
       contents = <<-EOH
 cache_type 'BasicFile'
 cache_options(:path => "\#{ENV['HOME']}/.chef/checksums")
-cookbook_path '#{sandbox_path}'
+cookbook_path '#{SANDBOX}'
 EOH
 
-      # create knife.rb
+      # Create knife.rb
       File.open("#{chef_path}/knife.rb", 'w+'){ |f| f.write(contents) }
     end
 
-    def knife_rb_path
-      File.join(Chef::Knife.chef_config_dir, 'knife.rb')
+    # Copy all the cookbooks provided in {#initialize} to the isolated sandbox location
+    def copy_cookbooks
+      cookbooks_and_dependencies.each do |cookbook|
+        sandbox_path = SANDBOX.join(cookbook.cookbook_name)
+
+        # Copy the files to our sandbox
+        FileUtils.cp_r(cookbook.path, sandbox_path)
+
+        # Override the @path location so we don't need to create a new object
+        cookbook.path = sandbox_path
+      end
     end
 
-    # Iterate over the cookbook's dependencies and ensure those cookbooks are
-    # also included in our sandbox by adding them to the @cookbooks instance
-    # variable. This method is actually semi-recursive because we append to the
-    # end of the array on which we are iterating, ensuring we load all dependencies
-    # dependencies.
-    def cookbooks_dependencies
-      @cookbooks_dependencies ||= begin
-        $stdout.puts 'Loading cookbook dependencies...'
+    # Load a cookbook from the given array of cookbook names
+    #
+    # @param [Array<String>] cookbook_names
+    #   the list of cookbooks to search for
+    # @return [Array<Berkshelf::CachedCookbook>]
+    #   the array of cached cookbooks
+    def load_cookbooks(cookbook_names)
+      cookbook_names.collect{ |cookbook_name| load_cookbook(cookbook_name) }
+    end
 
-        loaded_dependencies = Hash.new(false)
+    # Load an individual cookbook by its name
+    #
+    # @param [String] cookbook_name
+    #   the name of the cookbook to load
+    # @return [Berkshelf::CachedCookbook]
+    #   the cached cookbook
+    # @raise [Strainer::Error::CookbookNotFound]
+    #   when the cookbook was not found in any of the sources
+    def load_cookbook(cookbook_name)
+      cookbook = cookbooks_paths.collect do |path|
+        begin
+          Berkshelf::CachedCookbook.from_path(path.join(cookbook_name))
+        rescue Berkshelf::CookbookNotFound
+          # move onto the next source...
+          nil
+        end
+      end.compact.last
 
-        dependencies = @cookbooks.dup
+      cookbook ||= Berkshelf.cookbook_store.cookbooks(cookbook_name).last
 
-        dependencies.each do |cookbook|
-          cookbook.metadata.dependencies.keys.each do |dependency_name|
-            unless loaded_dependencies[dependency_name]
-              dependencies << load_cookbook(dependency_name)
-              loaded_dependencies[dependency_name] = true
-            end
+      unless cookbook
+        raise Strainer::Error::CookbookNotFound, "Could not find cookbook #{cookbook_name} in any of the sources."
+      end
+
+      cookbook
+    end
+
+    # Dynamically builds a list of possible cookbook paths from the
+    # `@options` hash, Berkshelf config, and Chef config, and a logical
+    # guess
+    #
+    # @return [Array<Pathname>]
+    #   a list of possible cookbook locations
+    def cookbooks_paths
+      @cookbooks_paths ||= begin
+        paths = [
+          @options[:cookbooks_path],
+          Strainer::Runner.chef_config.cookbook_path,
+          Berkshelf::Config.chef_config.cookbook_path,
+          'cookbooks'
+        ].flatten.compact.map{ |path| Pathname.new(File.expand_path(path)) }.uniq
+
+        paths.select{ |path| File.exists?(path) }
+      end
+    end
+
+    # Collect all cookbooks and the dependencies specified in their metadata.rb
+    # for copying
+    #
+    # @return [Array<Berkshelf::CachedCookbook>]
+    #   a list of cached cookbooks
+    def cookbooks_and_dependencies
+      loaded_dependencies = Hash.new(false)
+
+      dependencies = @cookbooks.dup
+      dependencies.each do |cookbook|
+        loaded_dependencies[cookbook.cookbook_name] = true
+
+        cookbook.metadata.dependencies.keys.each do |dependency_name|
+          unless loaded_dependencies[dependency_name]
+            dependencies << load_cookbook(dependency_name)
+            loaded_dependencies[dependency_name] = true
           end
         end
       end

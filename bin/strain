@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
-
 $:.unshift File.expand_path('../lib', __FILE__)
-
 require 'strainer'
-require 'strainer/cli'
 
-Strainer::CLI.run(*ARGV)
+# This executable is deprecated
+#
+# @deprecated use `bundle exec strainer test` instead!
+Strainer.ui.deprecated 'The `strain` command is deprecated. Use `strainer test $COOKBOOKS` instead!'
+system "strainer test #{ARGV.join(' ')}"
