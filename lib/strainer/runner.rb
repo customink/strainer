@@ -10,7 +10,7 @@ module Strainer
       '~/.chef/knife.rb',
       '/etc/chef/solo.rb',
       '/etc/chef/client.rb'
-    ].freeze
+    ].map{ |location| File.expand_path(location) }.freeze
 
     class << self
       # Perform a smart search for knife.rb chef configuration file
@@ -19,8 +19,11 @@ module Strainer
       #   the path to the chef configuration
       def chef_config_path
         @chef_config_path ||= begin
-          location = KNIFE_LOCATIONS.find{ |location| File.exists?(File.expand_path(location)) }
-          location ||= '~/.chef/knife.rb'
+          location = KNIFE_LOCATIONS.find{ |location| File.exists?(location) }
+
+          if location.nil?
+            raise ::Strainer::Error::ChefConfigNotFound, "Could not find a Chef configuration in any of the default locations. You can specify one with the `--config FILE` option"
+          end
 
           Pathname.new(File.expand_path(location))
         end
@@ -34,7 +37,7 @@ module Strainer
       #   the supplied string as a Pathname
       def chef_config_path=(path)
         @chef_config = nil
-        @chef_config_path = Pathname.new(path)
+        @chef_config_path = Pathname.new(File.expand_path(path))
         @chef_config_path
       end
 
@@ -44,9 +47,11 @@ module Strainer
       #   a chef configuration
       def chef_config
         @chef_config ||= begin
-          Chef::Config.from_file(chef_config_path)
-          Chef::Config
-        rescue
+          unless File.exist?(chef_config_path)
+            raise ::Strainer::Error::ChefConfigNotFound, "You specified a path to a Chef configuration file that did not exist: '#{chef_config_path}'"
+          end
+
+          Chef::Config.from_file(chef_config_path.to_s)
           Chef::Config
         end
       end

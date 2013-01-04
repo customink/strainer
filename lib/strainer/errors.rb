@@ -22,6 +22,11 @@ module Strainer
     # Raised when Strainer is unable to find a Strainerfile.
     #
     # @author Seth Vargo <sethvargo@gmail.com>
-    class StrainerfileNotFound < Base; status_code(101); end
+    class StrainerfileNotFound < Base; status_code(110); end
+
+    # Raised when Strainer is unable to find a knife.rb or client.rb.
+    #
+    # @author Seth Vargo <sethvargo@gmail.com>
+    class ChefConfigNotFound < Base; status_code(120); end
   end
 end

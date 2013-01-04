@@ -8,10 +8,21 @@ module Strainer
   #
   # @author Seth Vargo <sethvargo@gmail.com>
   class Cli < Thor
+    def initialize(*args)
+      super(*args)
+
+      # Override the config file if it's specified
+      ::Strainer::Runner.chef_config_path = @options[:config] if @options[:config]
+
+      # Unfreeze the options Hash from Thor
+      @options = options.dup
+    end
+
     # global options
     map ['-v', '--version'] => :version
     class_option :cookbooks_path, :type => :string,  :aliases => '-p', :desc => 'The path to the cookbook store', :banner => 'PATH'
-    class_option :config,         :type => :string,  :aliases => '-c', :desc => 'The path to the knife.rb config'
+    class_option :config,         :type => :string,  :aliases => '-c', :desc => 'The path to the knife.rb/client.rb config'
+    class_option :strainer_file,  :type => :string,  :aliases => '-s', :desc => 'The path to the Strainer file to run against', :banner => 'FILE'
 
     # strainer test *COOKBOOKS
     method_option :except,        :type => :array,   :aliases => '-e', :desc => 'Strainerfile labels to ignore'
