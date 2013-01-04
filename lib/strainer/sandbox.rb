@@ -127,7 +127,6 @@ EOH
         paths = [
           @options[:cookbooks_path],
           Strainer::Runner.chef_config.cookbook_path,
-          Berkshelf::Config.chef_config.cookbook_path,
           'cookbooks'
         ].flatten.compact.map{ |path| Pathname.new(File.expand_path(path)) }.uniq
 
