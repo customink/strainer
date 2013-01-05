@@ -6,4 +6,4 @@ require 'strainer'
 #
 # @deprecated use `bundle exec strainer test` instead!
 Strainer.ui.deprecated 'The `strain` command is deprecated. Use `strainer test $COOKBOOKS` instead!'
-system "strainer test #{ARGV.join(' ')}"
+exec "strainer test #{ARGV.join(' ')}"

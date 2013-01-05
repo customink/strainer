@@ -3,9 +3,9 @@ $:.unshift File.expand_path('../lib', __FILE__)
 require 'strainer'
 
 begin
-  Strainer::Cli.start
-rescue Strainer::Error::Base => e
+  ::Strainer::Cli.start
+rescue ::Strainer::Error::Base => e
   Strainer.ui.error "#{e.class} - #{e}"
-  Strainer.ui.error "  #{e.backtrace.join("\n  ")}" if ENV['STRAINER_DEBUG'] || ENV['BERKSHELF_DEBUG']
+  Strainer.ui.error "   #{e.backtrace.join("\n   ")}" if ENV['STRAINER_DEBUG']
   exit e.status_code
 end

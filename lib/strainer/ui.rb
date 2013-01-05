@@ -75,13 +75,20 @@ module Strainer
     end
     alias_method :fatal, :error
 
+    # Log a debugging message, if the proper environment
+    # flag was specified.
+    def debug(message)
+      return if quiet?
+      say('[DEBUG]   ' + message, :yellow) if ENV['STRAINER_DEBUG']
+    end
+
     # Print a deprecation notice to STDERR.
     #
     # @param [String] message
     #   the message to print
     def deprecated(message)
       return if quiet?
-      error('DEPRECATION NOTICE: ' + message)
+      error('[DEPRECATION]   ' + message)
     end
   end
 end
