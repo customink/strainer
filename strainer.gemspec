@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_runtime_dependency 'berkshelf', '~> 1.0'
+  gem.add_runtime_dependency 'celluloid', '~> 0.12'
 
   gem.add_development_dependency 'redcarpet'
   gem.add_development_dependency 'yard', '~> 0.8'

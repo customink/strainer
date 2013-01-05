@@ -3,6 +3,9 @@ module Strainer
   #
   # @author Seth Vargo <sethvargo@gmail.com>
   class Command
+    # Asynchronous command running
+    include Celluloid
+
     # List of colors to choose from when outputting labels
     COLORS = %w(yellow blue magenta cyan).freeze
 

@@ -1,5 +1,6 @@
 require 'berkshelf'
 require 'berkshelf/extensions'
+require 'celluloid'
 require 'pathname'
 require 'thor'
 

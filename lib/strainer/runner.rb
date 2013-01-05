@@ -73,17 +73,20 @@ module Strainer
         strainerfile = Strainer::Strainerfile.for(cookbook, options)
         Strainer.ui.header("# Straining '#{cookbook.cookbook_name} (v#{cookbook.version})'")
 
-        strainerfile.commands.each do |command|
-          success = command.run!
+        x = strainerfile.commands.map{ |command| command.future.run! }
+        x.map(&:value)
 
-          @report[cookbook.cookbook_name] ||= {}
-          @report[cookbook.cookbook_name][command.label] = success
+        # strainerfile.commands.each do |command|
+        #   success = command.async.run!
 
-          if @options[:fail_fast] && !success
-            Strainer.ui.fatal "Exited early because '--fail-fast' was specified. Some tests may have been skipped!"
-            abort
-          end
-        end
+        #   @report[cookbook.cookbook_name] ||= {}
+        #   @report[cookbook.cookbook_name][command.label] = success
+
+        #   if @options[:fail_fast] && !success
+        #     Strainer.ui.fatal "Exited early because '--fail-fast' was specified. Some tests may have been skipped!"
+        #     abort
+        #   end
+        # end
       end
 
       abort unless @report.values.collect(&:values).flatten.all?{|v| v == true}
