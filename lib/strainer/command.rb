@@ -35,12 +35,12 @@ module Strainer
 
       Dir.chdir Strainer.sandbox_path do
         speak command
-        PTY.spawn command do |, w, pid|
+        PTY.spawn command do |r, _, pid|
           begin
             r.sync
             r.each_line { |line| speak line }
           rescue Errno::EIO => e
-            # simply ignoring this
+            $stderr.puts e
           ensure
             ::Process.wait pid
           end
