@@ -1,3 +1,5 @@
+require 'pty'
+
 module Strainer
   # The Command class is responsible for a command (test) against a cookbook.
   #
@@ -33,7 +35,17 @@ module Strainer
 
       Dir.chdir Strainer.sandbox_path do
         speak command
-        speak `#{command}`
+        PTY.spawn command do |r, _, pid|
+          begin
+            r.sync
+            r.each_line { |line| speak line }
+          rescue Errno::EIO => e
+            # Ignore this. Otherwise errors will be thrown whenever
+            # the process is closed
+          ensure
+            ::Process.wait pid
+          end
+        end
 
         unless $?.success?
           Strainer.ui.error label_with_padding + Strainer.ui.set_color('Terminated with a non-zero exit status. Strainer assumes this is a failure.', :red)
