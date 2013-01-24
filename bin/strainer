@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-$:.unshift File.expand_path('../lib', __FILE__)
+$:.unshift File.expand_path('../../lib', __FILE__)
 require 'strainer'
 
 begin

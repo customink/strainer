@@ -5,7 +5,7 @@ v1.0.0
 ------
 - Moved entirely to Berkshelf integration
 - Moved entirely to thor
-- **Breaking** - new command `strainer`, old command is deprecated
+- **Breaking** - new command `strainer`, old command is deprecated and will be removed in `2.0.0`
 
 v0.2.1
 ------
@@ -15,7 +15,7 @@ v0.2.1
 
 v0.1.0
 ------
-- #nable loading of cookbook dependencies
+- Enable loading of cookbook dependencies
 
 v0.0.4
 ------
