@@ -18,5 +18,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'berkshelf', '~> 1.0'
 
   gem.add_development_dependency 'redcarpet'
-  gem.add_development_dependency 'yard', '~> 0.8'
+  gem.add_development_dependency 'yard'
+  gem.add_development_dependency 'rake'
 end
