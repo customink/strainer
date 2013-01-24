@@ -6,6 +6,7 @@ v1.0.0
 - Moved entirely to Berkshelf integration
 - Moved entirely to thor
 - **Breaking** - new command `strainer`, old command is deprecated and will be removed in `2.0.0`
+- Sync output
 
 v0.2.1
 ------
