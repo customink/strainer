@@ -31,7 +31,7 @@ module Strainer
       @options = options.dup
 
       # Use debugging output if asked
-      ENV['STRAINER_DEBUG'] = 'true' if @options[:debug]
+      $DEBUG = true if @options[:debug]
     end
 
     # global options

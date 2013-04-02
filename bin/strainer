@@ -2,10 +2,12 @@
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'strainer'
 
+$DEBUG = true if ENV['STRAINER_DEBUG']
+
 begin
   ::Strainer::Cli.start
 rescue ::Strainer::Error::Base => e
   Strainer.ui.error "#{e.class} - #{e}"
-  Strainer.ui.error "   #{e.backtrace.join("\n   ")}" if ENV['STRAINER_DEBUG']
+  Strainer.ui.error "   #{e.backtrace.join("\n   ")}" if $DEBUG
   exit e.status_code
 end

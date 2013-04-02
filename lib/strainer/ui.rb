@@ -79,7 +79,7 @@ module Strainer
     # flag was specified.
     def debug(message)
       return if quiet?
-      say('[DEBUG]   ' + message, :yellow) if ENV['STRAINER_DEBUG']
+      say('[DEBUG]   ' + message, :yellow) if $DEBUG
     end
 
     # Print a deprecation notice to STDERR.
