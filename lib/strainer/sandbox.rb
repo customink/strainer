@@ -6,6 +6,13 @@ module Strainer
     # The path to the testing sandbox inside the gem.
     SANDBOX = Strainer.root.join('sandbox').freeze
 
+    # Files and folders to exclude when copying Cookbooks into the Sandbox
+    EXCLUDE_PATHS = [
+      ".git", ".gitignore", ".rvmrc", "Gemfile", "Gemfile.lock",
+      "Berksfile", "Berksfile.lock", "Strainerfile", "spec"
+    ]
+
+
     # @return [Array<Berkshelf::CachedCookbook>]
     #   an array of cookbooks in this sandbox
     attr_reader :cookbooks
@@ -81,11 +88,35 @@ EOH
         sandbox_path = SANDBOX.join(cookbook.cookbook_name)
 
         # Copy the files to our sandbox
-        Strainer.ui.debug "Copying '#{cookbook.name}' to '#{sandbox_path}'"
-        FileUtils.cp_r(cookbook.path, sandbox_path)
+        Strainer.ui.debug "Creating sandbox directory '#{sandbox_path}'"
+        FileUtils::mkdir_p(sandbox_path)
+
+        Strainer.ui.debug "Getting list of files for '#{cookbook.name}'"
+        cookbook_files(cookbook).each do |path|
+          ::Strainer.ui.debug "Copying '#{path}' to sandbox"
+          FileUtils.cp_r(path, sandbox_path)
+        end
 
         # Override the @path location so we don't need to create a new object
         cookbook.path = sandbox_path
+      end
+    end
+
+    # Return an array of top-level paths for a Cookbook, excluding basenames
+    # defined in EXCLUDE_PATHS
+    #
+    # @param [Berkshelf::CachedCookbook] cookbook
+    #    the cookbook to get the listing for
+    # @return [Array<String>]
+    #    the list of paths to copy
+    def cookbook_files(cookbook)
+      Dir.glob(cookbook.path.to_s + "/*").reject do |path|
+        if EXCLUDE_PATHS.include? File::basename(path)
+          ::Strainer.ui.debug "Excluding '#{path}' from sandbox"
+          true
+        else
+          false
+        end
       end
     end
 

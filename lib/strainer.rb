@@ -3,6 +3,7 @@ require 'berkshelf/extensions'
 require 'celluloid'
 require 'pathname'
 require 'thor'
+require 'chef/config'
 
 require 'strainer/errors'
 
