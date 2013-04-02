@@ -138,7 +138,7 @@ EOH
       @cookbooks_paths ||= begin
         paths = [
           @options[:cookbooks_path],
-          Strainer::Runner.chef_config.cookbook_path,
+          Berkshelf::Chef::Config.instance[:cookbook_path],
           'cookbooks'
         ].flatten.compact.map{ |path| Pathname.new(File.expand_path(path)) }.uniq
 

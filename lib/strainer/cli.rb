@@ -12,7 +12,7 @@ module Strainer
       super(*args)
 
       # Override the config file if it's specified
-      ::Strainer::Runner.chef_config_path = @options[:config] if @options[:config]
+      Berkshelf::Chef::Config.path = @options[:config] if @options[:config]
 
       # Unfreeze the options Hash from Thor
       @options = options.dup
