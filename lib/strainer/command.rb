@@ -22,7 +22,10 @@ module Strainer
     #   the line to parse
     #   example: foodcritic -f any phantomjs
     def initialize(line, cookbook, options = {})
+      Strainer.ui.debug "Created new command from '#{line}'"
       @label, @command = line.split(':', 2).map(&:strip)
+      Strainer.ui.debug "  Label: #{@label.inspect}"
+      Strainer.ui.debug "  Command: #{@command.inspect}"
       @cookbook = cookbook
     end
 
@@ -33,7 +36,9 @@ module Strainer
     def run!
       title(label)
 
+      Strainer.ui.debug "Changing working directory to '#{Strainer.sandbox_path}'"
       Dir.chdir Strainer.sandbox_path do
+        Strainer.ui.debug "Running '#{command}'"
         speak command
         PTY.spawn command do |r, _, pid|
           begin
@@ -89,6 +94,7 @@ module Strainer
     # @param [String] title
     #   the title to update with
     def title(title)
+      Strainer.ui.debug "Setting terminal title to '#{title}'"
       $0 = title
       printf "\033]0;#{title}\007"
     end
