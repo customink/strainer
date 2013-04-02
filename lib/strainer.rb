@@ -2,6 +2,7 @@ require 'berkshelf'
 require 'berkshelf/extensions'
 require 'pathname'
 require 'thor'
+require 'chef/config'
 
 require 'strainer/errors'
 
