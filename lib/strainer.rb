@@ -1,5 +1,6 @@
 require 'berkshelf'
 require 'berkshelf/extensions'
+require 'celluloid'
 require 'pathname'
 require 'thor'
 
@@ -8,6 +9,7 @@ require 'strainer/errors'
 module Strainer
   autoload :Cli,            'strainer/cli'
   autoload :Command,        'strainer/command'
+  autoload :Logger,         'strainer/logger'
   autoload :Runner,         'strainer/runner'
   autoload :Sandbox,        'strainer/sandbox'
   autoload :Strainerfile,   'strainer/strainerfile'

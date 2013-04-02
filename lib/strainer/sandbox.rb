@@ -26,7 +26,7 @@ module Strainer
 
     # Clear out the existing sandbox and create the directories
     def reset_sandbox
-      ::Strainer.ui.debug "Resetting sandbox..."
+      Strainer.ui.debug "Resetting sandbox..."
       destroy_sandbox
       create_sandbox
     end
@@ -34,7 +34,7 @@ module Strainer
     # Destroy the current sandbox, if it exists
     def destroy_sandbox
       if File.directory?(SANDBOX)
-        ::Strainer.ui.debug "  Destroying sandbox at '#{SANDBOX}'"
+        Strainer.ui.debug "  Destroying sandbox at '#{SANDBOX}'"
         FileUtils.rm_rf(SANDBOX)
       end
     end
@@ -42,7 +42,7 @@ module Strainer
     # Create the sandbox unless it already exits
     def create_sandbox
       unless File.directory?(SANDBOX)
-        ::Strainer.ui.debug "  Creating sandbox at '#{SANDBOX}'"
+        Strainer.ui.debug "  Creating sandbox at '#{SANDBOX}'"
         FileUtils.mkdir_p(SANDBOX)
         copy_globals
         place_knife_rb
@@ -52,7 +52,7 @@ module Strainer
     # Copy over a whitelist of common files into our sandbox
     def copy_globals
       files = Dir[*%W(#{Strainer.strainerfile_name} foodcritic .rspec spec test)]
-      ::Strainer.ui.debug "Copying '#{files}' to '#{SANDBOX}'"
+      Strainer.ui.debug "Copying '#{files}' to '#{SANDBOX}'"
       FileUtils.cp_r(files, SANDBOX)
     end
 
@@ -60,7 +60,7 @@ module Strainer
     def place_knife_rb
       chef_path = SANDBOX.join('.chef')
 
-      ::Strainer.ui.debug "Creating directory '#{chef_path}'"
+      Strainer.ui.debug "Creating directory '#{chef_path}'"
       FileUtils.mkdir_p(chef_path)
 
       # Build the contents
@@ -71,7 +71,7 @@ cookbook_path '#{SANDBOX}'
 EOH
 
       # Create knife.rb
-      ::Strainer.ui.debug "Writing '#{chef_path}/knife.rb' with content: \n\n#{contents}\n"
+      Strainer.ui.debug "Writing '#{chef_path}/knife.rb' with content: \n\n#{contents}\n"
       File.open("#{chef_path}/knife.rb", 'w+'){ |f| f.write(contents) }
     end
 
@@ -81,7 +81,7 @@ EOH
         sandbox_path = SANDBOX.join(cookbook.cookbook_name)
 
         # Copy the files to our sandbox
-        ::Strainer.ui.debug "Copying '#{cookbook.name}' to '#{sandbox_path}'"
+        Strainer.ui.debug "Copying '#{cookbook.name}' to '#{sandbox_path}'"
         FileUtils.cp_r(cookbook.path, sandbox_path)
 
         # Override the @path location so we don't need to create a new object
@@ -108,24 +108,24 @@ EOH
     # @raise [Strainer::Error::CookbookNotFound]
     #   when the cookbook was not found in any of the sources
     def load_cookbook(cookbook_name)
-      ::Strainer.ui.debug "Sandbox#load_cookbook('#{cookbook_name}')"
+      Strainer.ui.debug "Sandbox#load_cookbook('#{cookbook_name}')"
       cookbook_path = cookbooks_paths.find { |path| path.join(cookbook_name).exist? }
 
       cookbook = if cookbook_path
         path = cookbook_path.join(cookbook_name)
-        ::Strainer.ui.debug "  found cookbook at '#{path}'"
+        Strainer.ui.debug "  found cookbook at '#{path}'"
 
         begin
           ::Berkshelf::CachedCookbook.from_path(path)
         rescue ::Berkshelf::CookbookNotFound
-          raise ::Strainer::Error::CookbookNotFound, "'#{path}' existed, but I could not extract a cookbook. Is there a 'metadata.rb'?"
+          raise Strainer::Error::CookbookNotFound, "'#{path}' existed, but I could not extract a cookbook. Is there a 'metadata.rb'?"
         end
       else
-        ::Strainer.ui.debug "  did not find '#{cookbook_name}' in any of the sources - resorting to the default cookbook_store..."
+        Strainer.ui.debug "  did not find '#{cookbook_name}' in any of the sources - resorting to the default cookbook_store..."
         Berkshelf.cookbook_store.cookbooks(cookbook_name).last
       end
 
-      cookbook || raise(::Strainer::Error::CookbookNotFound, "Could not find '#{cookbook_name}' in any of the sources.")
+      cookbook || raise(Strainer::Error::CookbookNotFound, "Could not find '#{cookbook_name}' in any of the sources.")
     end
 
     # Dynamically builds a list of possible cookbook paths from the
@@ -143,7 +143,7 @@ EOH
         ].flatten.compact.map{ |path| Pathname.new(File.expand_path(path)) }.uniq
 
         paths.select!{ |path| File.exists?(path) }
-        ::Strainer.ui.debug "Setting Sandbox#cookbooks_paths to #{paths.map(&:to_s)}"
+        Strainer.ui.debug "Setting Sandbox#cookbooks_paths to #{paths.map(&:to_s)}"
         paths
       end
     end
