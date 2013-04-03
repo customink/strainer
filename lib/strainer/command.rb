@@ -68,15 +68,18 @@ module Strainer
     # when the block is finished.
     #
     # @yield The block to execute inside the sandbox
+    # @return [Boolean]
+    #   `true` if the command exited successfully, `false` otherwise
     def inside_sandbox(&block)
       Strainer.ui.debug "Changing working directory to '#{Strainer.sandbox_path}'"
       original_pwd = ENV['PWD']
 
       ENV['PWD'] = Strainer.sandbox_path.to_s
-      Dir.chdir(Strainer.sandbox_path, &block)
+      success = Dir.chdir(Strainer.sandbox_path, &block)
       ENV['PWD'] = original_pwd
 
       Strainer.ui.debug "Restored working directory to '#{original_pwd}'"
+      success
     end
 
     # Have this command output text, prefixing with its output with the
