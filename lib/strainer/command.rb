@@ -36,8 +36,7 @@ module Strainer
     def run!
       title(label)
 
-      Strainer.ui.debug "Changing working directory to '#{Strainer.sandbox_path}'"
-      Dir.chdir Strainer.sandbox_path do
+      inside_sandbox do
         Strainer.ui.debug "Running '#{command}'"
         speak command
         PTY.spawn command do |r, _, pid|
@@ -61,6 +60,23 @@ module Strainer
           true
         end
       end
+    end
+
+    # Execute a block inside the sandbox directory defined in 'Strainer.sandbox_path'.
+    # This will first change the 'PWD' env variable to the sandbox path, and then
+    # pass the given block into 'Dir.chdir'. 'PWD' is restored to the original value
+    # when the block is finished.
+    #
+    # @yield The block to execute inside the sandbox
+    def inside_sandbox(&block)
+      Strainer.ui.debug "Changing working directory to '#{Strainer.sandbox_path}'"
+      original_pwd = ENV['PWD']
+
+      ENV['PWD'] = Strainer.sandbox_path.to_s
+      Dir.chdir(Strainer.sandbox_path, &block)
+      ENV['PWD'] = original_pwd
+
+      Strainer.ui.debug "Restored working directory to '#{original_pwd}'"
     end
 
     # Have this command output text, prefixing with its output with the
