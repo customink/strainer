@@ -39,7 +39,7 @@ module Strainer
       inside_sandbox do
         Strainer.ui.debug "Running '#{command}'"
         speak command
-        PTY.spawn command do |r, _, pid|
+        PTY.spawn(command) do |r, _, pid|
           begin
             r.sync
             r.each_line { |line| speak line }
