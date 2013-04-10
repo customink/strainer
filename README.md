@@ -32,6 +32,14 @@ To strain, simply run the `strain` command and pass in the cookbook(s) to strain
 
 This will first detect the cookbook dependencies, copy the cookbook and all dependencies into a sandbox. It will execute the contents of the `Strainerfile` on each cookbook.
 
+Standalone
+----------
+As of `2.0.0`, Strainer supports "standalone" mode. This allows you to use Strainer file from within a cookbook. Instead of specifying the path for a cookbook, you just use `test`
+
+    $ bundle exec strainer test
+
+from the root of your cookbook. **Note**: your cookbook must have it's own Gemfile and working directory.
+
 Berkshelf
 ---------
 [Berkshelf](http://berkshelf.com/) is a tool for managing multiple cookbooks. It works very similar to how a `Gemfile` works with Rubygems. If you're already using Berkshelf, Strainer will work out of the box. If you're not using Berkshelf, Strainer will work out of the box.
