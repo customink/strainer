@@ -60,16 +60,24 @@ module Strainer
 
       # Copy over a whitelist of common files into our sandbox
       def copy_globals
+        default_strainer_file=Strainer.strainerfile_name
+        custom_strainer_file=@options['strainer_file']
+
         if chef_repo?
-          files = Dir[*%W(#{Strainer.strainerfile_name} foodcritic .rspec spec test)]
+          files = Dir[*%W(#{default_strainer_file} foodcritic .rspec spec test)]
         elsif cookbook_repo?
-          files = Dir[*%W(#{Strainer.strainerfile_name} foodcritic .rspec)]
+          files = Dir[*%W(#{default_strainer_file} foodcritic .rspec)]
         else
           files = []
         end
 
         Strainer.ui.debug "Copying '#{files}' to '#{SANDBOX}'"
         FileUtils.cp_r(files, SANDBOX)
+
+        if custom_strainer_file
+          Strainer.ui.debug "Copying custom strainer file '#{custom_strainer_file}' to '#{SANDBOX}' as '#{default_strainer_file}'"
+          FileUtils.cp(custom_strainer_file, "#{SANDBOX}/#{default_strainer_file}")
+        end
       end
 
       # Create a basic knife.rb file to ensure tests run successfully
