@@ -11,8 +11,7 @@ module Strainer
     #   a list of options to pass along
     def initialize(cookbook_names, options = {})
       Strainer.ui.debug "Created new Strainer::Runner with #{cookbook_names.inspect}, options: #{options.inspect}"
-      @options   = options
-      @sandbox   = Strainer::Sandbox.new(cookbook_names, @options)
+      @sandbox   = Strainer::Sandbox.new(cookbook_names, options)
       @cookbooks = @sandbox.cookbooks
       @report    = {}
 
@@ -28,7 +27,7 @@ module Strainer
           @report[cookbook.cookbook_name][command.label] = success
           Strainer.ui.debug "Strainer::Runner#report: #{@report.inspect}"
 
-          if @options[:fail_fast] && !success
+          if options[:fail_fast] && !success
             Strainer.ui.debug "Run was not successful and --fail-fast was specified"
             Strainer.ui.fatal "Exited early because '--fail-fast' was specified. Some tests may have been skipped!"
             abort

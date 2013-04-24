@@ -4,7 +4,7 @@ module Strainer
   # @author Seth Vargo <sethvargo@gmail.com>
   class Strainerfile
     # The filename for the Strainerfile
-    FILENAME = 'Strainerfile'
+    DEFAULT_FILENAME = 'Strainerfile'
 
     class << self
       # (see #initialize)
@@ -26,13 +26,13 @@ module Strainer
       @options = options
 
       locations = [
-        @cookbook.path.join(FILENAME),
-        Strainer.sandbox_path.join(FILENAME)
+        @cookbook.path.join(options[:strainer_file]),
+        Strainer.sandbox_path.join(options[:strainer_file])
       ]
 
       @strainerfile = locations.find{ |location| File.exists?(location) }
 
-      raise Strainer::Error::StrainerfileNotFound, "Could not find a Strainerfile for cookbook '#{cookbook.cookbook_name}'." unless @strainerfile
+      raise Strainer::Error::StrainerfileNotFound, "Could not find a Strainerfile named '#{options[:strainer_file]}' for cookbook '#{cookbook.cookbook_name}'." unless @strainerfile
 
       load!
     end

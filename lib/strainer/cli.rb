@@ -27,6 +27,9 @@ module Strainer
       # Override the config file if it's specified
       Berkshelf::Chef::Config.path = @options[:config] if @options[:config]
 
+      # Use a different Strainerfile if one was given
+      Strainer.strainerfile = File.expand_path(@options[:strainer_file])
+
       # Unfreeze the options Hash from Thor
       @options = options.dup
 
@@ -38,7 +41,7 @@ module Strainer
     map ['-v', '--version'] => :version
     class_option :cookbooks_path, :type => :string,  :aliases => '-p', :desc => 'The path to the cookbook store', :banner => 'PATH'
     class_option :config,         :type => :string,  :aliases => '-c', :desc => 'The path to the knife.rb/client.rb config'
-    class_option :strainer_file,  :type => :string,  :aliases => '-s', :desc => 'The path to the Strainer file to run against', :banner => 'FILE'
+    class_option :strainer_file,  :type => :string,  :aliases => '-s', :desc => 'The path to the Strainer file to run against', :banner => 'FILE', :default => Strainer::Strainerfile::DEFAULT_FILENAME
     class_option :debug,          :type => :boolean, :aliases => '-d', :desc => 'Show debugging log output', :default => false
 
     # strainer test *COOKBOOKS

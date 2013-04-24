@@ -61,9 +61,9 @@ module Strainer
       # Copy over a whitelist of common files into our sandbox
       def copy_globals
         if chef_repo?
-          files = Dir[*%W(#{Strainer.strainerfile_name} foodcritic .rspec spec test)]
+          files = Dir[*%W(#{@options['strainer_file']} foodcritic .rspec spec test)]
         elsif cookbook_repo?
-          files = Dir[*%W(#{Strainer.strainerfile_name} foodcritic .rspec)]
+          files = Dir[*%W(#{@options['strainer_file']} foodcritic .rspec)]
         else
           files = []
         end

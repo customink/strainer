@@ -41,15 +41,6 @@ module Strainer
     def sandbox_path
       Strainer::Sandbox::SANDBOX
     end
-
-    # Helper method to access a constant defined in Strainer::Strainerfile that
-    # specifies the filename for Strainer
-    #
-    # @return [String]
-    #   the filename for Strainerfile
-    def strainerfile_name
-      Strainer::Strainerfile::FILENAME
-    end
   end
 end
 
