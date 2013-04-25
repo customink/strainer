@@ -27,9 +27,6 @@ module Strainer
       # Override the config file if it's specified
       Berkshelf::Chef::Config.path = @options[:config] if @options[:config]
 
-      # Use a different Strainerfile if one was given
-      Strainer.strainerfile = File.expand_path(@options[:strainer_file])
-
       # Unfreeze the options Hash from Thor
       @options = options.dup
 
