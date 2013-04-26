@@ -231,9 +231,9 @@ module Strainer
       # @return [Array]
       #   the list of root-level directories
       def root_folders
-        @root_folders ||= Dir.glob("#{Dir.pwd}/*", File::FNM_DOTMATCH).tap { |a| a.shift(2) }.collect do |f|
+        @root_folders ||= Dir.glob("#{Dir.pwd}/*", File::FNM_DOTMATCH).collect do |f|
           File.basename(f) if File.directory?(f)
-        end.compact
+        end.reject!{|dir| %w(. ..).include? dir}.compact!
       end
 
       # Determine if the current project is a git repo?
