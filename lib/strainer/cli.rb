@@ -48,7 +48,7 @@ module Strainer
     desc 'test [COOKBOOKS]', 'Run tests against the given cookbooks'
     def test(*cookbooks)
       Strainer.ui.debug "Called Strainer::Cli#test with #{cookbooks.inspect}"
-      Strainer::Runner.new(cookbooks, options)
+      Strainer::Runner.new(cookbooks, options).run
     end
 
     # strainer info
