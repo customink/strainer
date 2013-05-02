@@ -10,6 +10,8 @@ module Strainer
     extend Equivalence
     equivalence :@cookbook_names, :@options
 
+    attr_reader :cookbooks
+
     # Creates a Strainer runner
     #
     # @param [Array<String>] cookbook_names
@@ -22,15 +24,19 @@ module Strainer
       @cookbook_names = cookbook_names
       @options = options
       @sandbox   = Strainer::Sandbox.new(cookbook_names, options)
-      @cookbooks = @sandbox.cookbooks
       @report    = {}
+      @cookbooks = {}
+
+      load_strainerfiles
     end
 
     # Runs the Strainer runner
     def run
-      @cookbooks.each do |cookbook|
+      @cookbooks.each do |name, c|
+        cookbook = c[:cookbook]
+        strainerfile = c[:strainerfile]
+
         Strainer.ui.debug "Starting Runner for #{cookbook.cookbook_name} (#{cookbook.version})"
-        strainerfile = Strainer::Strainerfile.for(cookbook, @options)
         Strainer.ui.header("# Straining '#{cookbook.cookbook_name} (v#{cookbook.version})'")
 
         strainerfile.commands.each do |command|
@@ -49,6 +55,16 @@ module Strainer
       end
 
       abort unless @report.values.collect(&:values).flatten.all?
+    end
+
+    private
+    def load_strainerfiles
+      @sandbox.cookbooks.each do |cookbook|
+        @cookbooks[cookbook.name] = {
+          cookbook: cookbook,
+          strainerfile: Strainer::Strainerfile.for(cookbook, @options)
+        }
+      end
     end
   end
 end

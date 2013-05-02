@@ -52,6 +52,13 @@ module Strainer
       end
     end
 
+    # Reloads the Strainerfile from disk
+    def reload!
+      @all_commands = nil
+      @commands = nil
+      load!
+    end
+
     private
     # Parse the given Strainerfile
     def load!
