@@ -93,6 +93,7 @@ module Strainer
 
       # Copy all the cookbooks provided in {#initialize} to the isolated sandbox location
       def copy_cookbooks
+        Strainer.ui.debug "Sandbox#copy_cookbooks"
         cookbooks_and_dependencies.each do |cookbook|
           sandbox_path = SANDBOX.join(cookbook.cookbook_name)
 
@@ -112,6 +113,7 @@ module Strainer
       # @return [Array<Berkshelf::CachedCookbook>]
       #   the array of cached cookbooks
       def load_cookbooks(cookbook_names)
+        Strainer.ui.debug "Sandbox#load_cookbooks(#{cookbook_names.inspect})"
         cookbook_names.collect{ |cookbook_name| load_cookbook(cookbook_name) }
       end
 
@@ -124,7 +126,7 @@ module Strainer
       # @raise [Strainer::Error::CookbookNotFound]
       #   when the cookbook was not found in any of the sources
       def load_cookbook(cookbook_name)
-        Strainer.ui.debug "Sandbox#load_cookbook('#{cookbook_name}')"
+        Strainer.ui.debug "Sandbox#load_cookbook('#{cookbook_name.inspect}')"
         cookbook_path = cookbooks_paths.find { |path| path.join(cookbook_name).exist? }
 
         cookbook = if cookbook_path
