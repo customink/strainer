@@ -1,6 +1,14 @@
 Strainer CHANGELOG
 ==================
 
+v2.0.1
+------
+- Lower threshold for detecting if the parent is a chef_repo
+
+v2.0.0
+------
+- Magical improvements
+
 v1.0.0
 ------
 - Moved entirely to Berkshelf integration
