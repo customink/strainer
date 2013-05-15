@@ -26,6 +26,9 @@ module Strainer
           Strainer.ui.warn "Supply specific cookbooks to a cookbook_repo is not supported. Use `strainer test` with no arguments instead."
         end
         @cookbooks = [load_self]
+      else
+        Strainer.ui.warn "I could not detect if you were a chef-repo or a cookbook!"
+        @cookbooks = []
       end
 
       reset_sandbox
@@ -214,7 +217,7 @@ module Strainer
       def chef_repo?
         @_chef_repo ||= begin
           chef_folders = %w(.chef certificates config cookbooks data_bags environments roles)
-          (root_folders & chef_folders).size > 4
+          (root_folders & chef_folders).size > 2
         end
       end
 
