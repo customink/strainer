@@ -24,7 +24,7 @@ module Strainer
     end
 
     # Runs the Strainer runner
-    def run
+    def run!
       @cookbooks.each do |name, c|
         cookbook = c[:cookbook]
         strainerfile = c[:strainerfile]
@@ -59,7 +59,7 @@ module Strainer
         self.cookbook_names == runner.cookbook_names &&
         self.options == runner.options
     end
-    alias :== :eql?
+    alias_method :==, :eql?
 
     private
     def load_strainerfiles

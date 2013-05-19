@@ -54,8 +54,7 @@ module Strainer
 
     # Reloads the Strainerfile from disk
     def reload!
-      @all_commands = nil
-      @commands = nil
+      @all_commands, @commands = nil, nil
       load!
     end
 
