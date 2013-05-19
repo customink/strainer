@@ -1,16 +1,9 @@
-require 'equivalence'
-
 module Strainer
   # The Runner class is responsible for executing the tests against cookbooks.
   #
   # @author Seth Vargo <sethvargo@gmail.com>
   class Runner
-    # Define equivalence information for Runner
-    # See https://github.com/ernie/equivalence
-    extend Equivalence
-    equivalence :@cookbook_names, :@options
-
-    attr_reader :cookbooks
+    attr_reader :cookbooks, :cookbook_names, :options
 
     # Creates a Strainer runner
     #
@@ -56,6 +49,17 @@ module Strainer
 
       abort unless @report.values.collect(&:values).flatten.all?
     end
+
+    def hash
+      [@cookbook_names, @options].hash
+    end
+
+    def eql?(runner)
+      self.class == runner.class &&
+        self.cookbook_names == runner.cookbook_names &&
+        self.options == runner.options
+    end
+    alias :== :eql?
 
     private
     def load_strainerfiles
