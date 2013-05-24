@@ -59,7 +59,7 @@ module Strainer
           if options[:fail_fast] && !success
             Strainer.ui.debug "Run was not successful and --fail-fast was specified"
             Strainer.ui.fatal "Exited early because '--fail-fast' was specified. Some tests may have been skipped!"
-            abort
+            return false
           end
         end
       end
@@ -71,10 +71,10 @@ module Strainer
 
       if @report.values.collect(&:values).flatten.all?
         Strainer.ui.say "Strainer marked build OK"
-        exit(true)
+        return true
       else
         Strainer.ui.say "Strainer marked build as failure"
-        exit(false)
+        return false
       end
     end
 
