@@ -56,6 +56,10 @@ As of `v0.0.4`, there's an option for `--fail-fast` that will fail immediately w
 
 This can save time, especially when running tests locally. This is *not* recommended on continuous integration.
 
+Custom Sandboxes
+----------------
+By default, Strainer uses `Dir.mktmpdir` to execute your sandbox in. This means the directory is destroyed in due time. However, you can pass the `--sandbox` option to specify a specific sandbox.
+
 Custom Foodcritic Rules
 -----------------------
 I always advocate using both [Etsy Foodcritic Rules](https://github.com/etsy/foodcritic-rules) and [CustomInk Foodcritic Rules](https://github.com/customink-webops/foodcritic-rules) in all your projects. I also advocate keeping them all as submodules in `[Chef Repo]/foodcritic/...`. This makes strainer unhappy...
