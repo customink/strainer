@@ -1,9 +1,13 @@
+require 'thor'
+
 module Strainer
   # Extend Thor::Shell::Color to provide nice helpers for outputting
   # to the console.
   #
+  # This module will also force UI calls to log to the output file.
+  #
   # @author Seth Vargo <sethvargo@gmail.com>
-  class UI < ::Thor::Shell::Color
+  module UI
     # Print the given message to STDOUT.
     #
     # @param [String]
@@ -13,10 +17,20 @@ module Strainer
     # @param [Boolean] new_line
     #   include a new_line character
     def say(message = '', color = nil, new_line = nil)
+      Strainer.log.info(message.gsub(/\e\[\d+[;\d]*m/, ''))
+
       return if quiet?
       super(message, color)
     end
-    alias_method :info, :say
+
+    # Print the given message to STDOUT.
+    # @see {say}
+    def info(message = '', color = nil, new_line = nil)
+      Strainer.log.info(message.gsub(/\e\[\d+[;\d]*m/, ''))
+
+      return if quiet?
+      super(message, color)
+    end
 
     # Print the given message to STDOUT.
     #
@@ -27,6 +41,8 @@ module Strainer
     # @param [Boolean] log_status
     #   whether to log the status
     def say_status(status, message, log_status = true)
+      Strainer.log.info("status: #{status}, message: #{message}")
+
       return if quiet?
       super(status, message, log_status)
     end
@@ -69,6 +85,8 @@ module Strainer
     # @param [Symbol] color
     #   the color to use
     def error(message, color = :red)
+      Strainer.log.error(message)
+
       return if quiet?
       message = set_color(message, *color) if color
       super(message)
@@ -88,7 +106,10 @@ module Strainer
     #   the message to print
     def deprecated(message)
       return if quiet?
-      error('[DEPRECATION]   ' + message)
+      warn('[DEPRECATION]   ' + message)
     end
   end
 end
+
+# Include this module in Thor's shell
+Thor::Base.shell.send(:include, Strainer::UI)

@@ -17,7 +17,7 @@ module Strainer
     # @param [Hash] options
     #   a list of options to pass along
     def initialize(cookbook_names, options = {})
-      @options   = options
+      @options = options
 
       if chef_repo?
         @cookbooks = load_cookbooks(cookbook_names)
@@ -32,7 +32,6 @@ module Strainer
       end
 
       reset_sandbox
-      copy_cookbooks
     end
 
     private
@@ -45,20 +44,24 @@ module Strainer
 
       # Destroy the current sandbox, if it exists
       def destroy_sandbox
-        if File.directory?(SANDBOX)
-          Strainer.ui.debug "  Destroying sandbox at '#{SANDBOX}'"
-          FileUtils.rm_rf(SANDBOX)
+        if File.directory?(Strainer.sandbox_path)
+          Strainer.ui.debug "  Destroying sandbox at '#{Strainer.sandbox_path}'"
+          FileUtils.rm_rf(Strainer.sandbox_path)
+        else
+          Strainer.ui.debug "  Sandbox does not exist... skipping"
         end
       end
 
       # Create the sandbox unless it already exits
       def create_sandbox
-        unless File.directory?(SANDBOX)
-          Strainer.ui.debug "  Creating sandbox at '#{SANDBOX}'"
-          FileUtils.mkdir_p(SANDBOX)
-          copy_globals
-          place_knife_rb
+        unless File.directory?(Strainer.sandbox_path)
+          Strainer.ui.debug "  Creating sandbox at '#{Strainer.sandbox_path}'"
+          FileUtils.mkdir_p(Strainer.sandbox_path)
         end
+
+        copy_globals
+        place_knife_rb
+        copy_cookbooks
       end
 
       # Copy over a whitelist of common files into our sandbox
@@ -71,13 +74,13 @@ module Strainer
           files = []
         end
 
-        Strainer.ui.debug "Copying '#{files}' to '#{SANDBOX}'"
-        FileUtils.cp_r(files, SANDBOX)
+        Strainer.ui.debug "Copying '#{files}' to '#{Strainer.sandbox_path}'"
+        FileUtils.cp_r(files, Strainer.sandbox_path)
       end
 
       # Create a basic knife.rb file to ensure tests run successfully
       def place_knife_rb
-        chef_path = SANDBOX.join('.chef')
+        chef_path = Strainer.sandbox_path.join('.chef')
 
         Strainer.ui.debug "Creating directory '#{chef_path}'"
         FileUtils.mkdir_p(chef_path)
@@ -86,7 +89,7 @@ module Strainer
         contents = <<-EOH
   cache_type 'BasicFile'
   cache_options(:path => "\#{ENV['HOME']}/.chef/checksums")
-  cookbook_path '#{SANDBOX}'
+  cookbook_path '#{Strainer.sandbox_path}'
   EOH
 
         # Create knife.rb
@@ -98,14 +101,14 @@ module Strainer
       def copy_cookbooks
         Strainer.ui.debug "Sandbox#copy_cookbooks"
         cookbooks_and_dependencies.each do |cookbook|
-          sandbox_path = SANDBOX.join(cookbook.cookbook_name)
+          cookbook_sandbox = Strainer.sandbox_path.join(cookbook.cookbook_name)
 
           # Copy the files to our sandbox
-          Strainer.ui.debug "Copying '#{cookbook.name}' to '#{sandbox_path}'"
-          FileUtils.cp_r(cookbook.path, sandbox_path)
+          Strainer.ui.debug "Copying '#{cookbook.name}' to '#{cookbook_sandbox}'"
+          FileUtils.cp_r(cookbook.path, cookbook_sandbox)
 
           # Override the @path location so we don't need to create a new object
-          cookbook.path = sandbox_path
+          cookbook.path = cookbook_sandbox
         end
       end
 

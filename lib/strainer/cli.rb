@@ -1,9 +1,6 @@
 require 'strainer'
 
 module Strainer
-  # Use our own custom shell
-  Thor::Base.shell = Strainer::UI
-
   # Cli runner for Strainer
   #
   # @author Seth Vargo <sethvargo@gmail.com>
@@ -27,6 +24,9 @@ module Strainer
       # Override the config file if it's specified
       Berkshelf::Chef::Config.path = @options[:config] if @options[:config]
 
+      # Set the Strainer path if it's specified
+      Strainer.sandbox_path = @options[:sandbox] if @options[:sandbox]
+
       # Unfreeze the options Hash from Thor
       @options = options.dup
 
@@ -39,6 +39,7 @@ module Strainer
     class_option :cookbooks_path, :type => :string,  :aliases => '-p', :desc => 'The path to the cookbook store', :banner => 'PATH'
     class_option :config,         :type => :string,  :aliases => '-c', :desc => 'The path to the knife.rb/client.rb config'
     class_option :strainer_file,  :type => :string,  :aliases => '-s', :desc => 'The path to the Strainer file to run against', :banner => 'FILE', :default => Strainer::Strainerfile::DEFAULT_FILENAME
+    class_option :sandbox,        :type => :string,  :aliases => '-s', :desc => 'The sandbox path (defaults to a temporary directory)', :defaut => Dir.mktmpdir
     class_option :debug,          :type => :boolean, :aliases => '-d', :desc => 'Show debugging log output', :default => false
 
     # strainer test *COOKBOOKS

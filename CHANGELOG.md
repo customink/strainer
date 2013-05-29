@@ -1,5 +1,12 @@
 Strainer CHANGELOG
 ==================
+v2.1.0
+------
+- Added `--sandbox` option (#24)
+- Added automatic logging and logfile
+- Added support for Windows output (since it can't handle colors)
+- Moved sandbox out of gem directory
+- Converted UI to a module instead of subclass of Thor
 
 v2.0.1
 ------
