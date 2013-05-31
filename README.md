@@ -26,7 +26,7 @@ That `Strainerfile` will run [foodcritic](https://github.com/acrmp/foodcritic) a
     foodcritic: bundle exec foodcritic -f any $SANDBOX/$COOKBOOK
     chefspec: bundle exec rspec $SANDBOX/$COOKBOOK
 
-To strain, simply run the `strain` command and pass in the cookbook(s) to strain:
+To strain, simply run the `strainer` command and pass in the cookbook(s) to strain:
 
     $ bundle exec strainer test phantomjs tmux
 
