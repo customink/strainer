@@ -1,5 +1,9 @@
 Strainer CHANGELOG
 ==================
+v3.0.0
+------
+- Upgrade Berkshelf dependency (#27)
+
 v2.1.0
 ------
 - Added `--sandbox` option (#24)
