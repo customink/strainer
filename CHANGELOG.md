@@ -1,5 +1,9 @@
 Strainer CHANGELOG
 ==================
+v3.0.1
+------
+- Fix Berkshelf Chef Config
+
 v3.0.0
 ------
 - Upgrade Berkshelf dependency (#27)
