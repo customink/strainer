@@ -2,6 +2,10 @@ Strainer CHANGELOG
 ==================
 v3.0.1
 ------
+- Fix typo in CLI :default (#28)
+
+v3.0.1
+------
 - Fix Berkshelf Chef Config
 
 v3.0.0
