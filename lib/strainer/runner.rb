@@ -50,7 +50,13 @@ module Strainer
       # Move the logfile back over
       FileUtils.mv(Strainer.logfile_path, Strainer.sandbox_path.join('strainer.out'))
 
-      abort unless @report.values.collect(&:values).flatten.all?
+      if @report.values.collect(&:values).flatten.all?
+        Strainer.ui.say "Strainer marked build OK"
+        exit(true)
+      else
+        Strainer.ui.say "Strainer marked build as failure"
+        exit(false)
+      end
     end
 
     def hash

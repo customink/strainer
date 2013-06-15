@@ -1,5 +1,9 @@
 Strainer CHANGELOG
 ==================
+v3.0.2
+------
+- Output summary message
+
 v3.0.1
 ------
 - Fix typo in CLI :default (#28)
