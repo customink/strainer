@@ -1,5 +1,9 @@
 Strainer CHANGELOG
 ==================
+v3.0.3
+------
+- Add Thor and Rake tasks
+
 v3.0.2
 ------
 - Output summary message

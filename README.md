@@ -69,6 +69,29 @@ Strainer runs everything in an isolated sandbox, inside your Chef Repo. When inc
     # Strainerfile
     foodcritic: bundle exec foodcritic -I foodcritic/* -f any $SANDBOX/$COOKBOOK
 
+Rake Task
+---------
+Strainer includes a Rake task for convenience:
+
+```ruby
+require 'strainer/rake_task'
+
+Strainer::RakeTask.new(:strainer) do |s|
+  s.except = [...]
+  s.strainerfile = 'MyStraienrfile'
+end
+```
+
+Thor Task
+---------
+Strainer includes a Thor task for convenience:
+
+```ruby
+require 'strainer/thor'
+
+Strainer::Thor...
+```
+
 Needs Your Help
 ---------------
 This is a list of features or problem *you* can help solve! Fork and submit a pull request to make Strain even better!
