@@ -1,20 +1,26 @@
+#
+# Copyright 2013, Seth Vargo <sethvargo@gmail.com>
+# Copyright 2013, CustomInk, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 require 'berkshelf'
-require 'berkshelf/extensions'
 require 'celluloid'
 require 'pathname'
 require 'thor'
 
-require 'strainer/errors'
-require 'strainer/ui'
-
 module Strainer
-  autoload :Cli,            'strainer/cli'
-  autoload :Command,        'strainer/command'
-  autoload :Runner,         'strainer/runner'
-  autoload :Sandbox,        'strainer/sandbox'
-  autoload :Strainerfile,   'strainer/strainerfile'
-  autoload :Version,        'strainer/version'
-
   class << self
     # The root of the application.
     #
@@ -86,3 +92,13 @@ end
 
 # Sync STDOUT to get "real-time" output
 STDOUT.sync = true
+
+require_relative 'berkshelf/extensions'
+require_relative 'strainer/cli'
+require_relative 'strainer/command'
+require_relative 'strainer/errors'
+require_relative 'strainer/runner'
+require_relative 'strainer/sandbox'
+require_relative 'strainer/strainerfile'
+require_relative 'strainer/ui'
+require_relative 'strainer/version'
