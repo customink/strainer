@@ -24,7 +24,8 @@ That `Strainerfile` will run [foodcritic](https://github.com/acrmp/foodcritic) a
     # Strainerfile
     knife test: bundle exec knife cookbook test $COOKBOOK
     foodcritic: bundle exec foodcritic -f any $SANDBOX/$COOKBOOK
-    chefspec: bundle exec rspec $SANDBOX/$COOKBOOK
+    chefspec:   bundle exec rspec --color
+    kitchen:    bundle exec kitchen test
 
 To strain, simply run the `strainer` command and pass in the cookbook(s) to strain:
 
@@ -39,6 +40,19 @@ As of `2.0.0`, Strainer supports "standalone" mode. This allows you to use Strai
     $ bundle exec strainer test
 
 from the root of your cookbook. **Note**: your cookbook must have it's own Gemfile and working directory.
+
+Running on CI
+-------------
+It's very easy to use Strainer on your CI system. If your cookbook is run on Travis CI, for example, you could use the following `.travis.yml` file:
+
+```yaml
+rvm:
+  - 1.9.3
+  - 2.0.0
+script: bundle exec strainer test --except kitchen
+```
+
+(Currently test-kitchen cannot be run on Travis, which is why it's skipped)
 
 Berkshelf
 ---------
