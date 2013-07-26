@@ -58,10 +58,6 @@ Berkshelf
 ---------
 [Berkshelf](http://berkshelf.com/) is a tool for managing multiple cookbooks. It works very similar to how a `Gemfile` works with Rubygems. If you're already using Berkshelf, Strainer will work out of the box. If you're not using Berkshelf, Strainer will work out of the box.
 
-Librarian Chef
---------------
-Strainer does not support librarian-chef, and I have no plans to implement this feature. PRs are welcome, but Strainer is closely tied to Berkshelf, intentionally.
-
 Failing Quickly
 ---------------
 As of `v0.0.4`, there's an option for `--fail-fast` that will fail immediately when any strain command returns a non-zero exit code:
