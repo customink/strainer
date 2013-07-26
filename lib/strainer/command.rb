@@ -25,6 +25,9 @@ module Strainer
     # List of colors to choose from when outputting labels
     COLORS = %w(yellow blue magenta cyan).freeze
 
+    # List of commands that must be run from inside a cookbook
+    COOKBOOK_COMMANDS = %w(rspec kitchen)
+
     # @return [String]
     #   the "text" form of the command to run
     attr_reader :command
@@ -53,7 +56,7 @@ module Strainer
     def run!
       title(label)
 
-      inside_sandbox do
+      inside do
         Strainer.ui.debug "Running '#{command}'"
         speak command
         PTY.spawn(command) do |r, _, pid|
@@ -79,24 +82,17 @@ module Strainer
       end
     end
 
-    # Execute a block inside the sandbox directory defined in 'Strainer.sandbox_path'.
-    # This will first change the 'PWD' env variable to the sandbox path, and then
-    # pass the given block into 'Dir.chdir'. 'PWD' is restored to the original value
-    # when the block is finished.
-    #
-    # @yield The block to execute inside the sandbox
-    # @return [Boolean]
-    #   `true` if the command exited successfully, `false` otherwise
-    def inside_sandbox(&block)
-      Strainer.ui.debug "Changing working directory to '#{Strainer.sandbox_path}'"
-      original_pwd = ENV['PWD']
-
-      ENV['PWD'] = Strainer.sandbox_path.to_s
-      success = Dir.chdir(Strainer.sandbox_path, &block)
-      ENV['PWD'] = original_pwd
-
-      Strainer.ui.debug "Restored working directory to '#{original_pwd}'"
-      success
+    # Logic gate to determine if a command should be run from the sandbox or the cookbook.
+    # @see {inside_cookbook}
+    # @see {inside_sandbox}
+    def inside(&block)
+      if COOKBOOK_COMMANDS.any? { |c| command =~ /#{c}/ }
+        Strainer.ui.debug "Detected '#{command}' should be run from inside the cookbook"
+        inside_cookbook(&block)
+      else
+        Strainer.ui.debug "Detected '#{command}' should be run from inside the sandbox"
+        inside_sandbox(&block)
+      end
     end
 
     # Have this command output text, prefixing with its output with the
@@ -142,6 +138,44 @@ module Strainer
     def label_with_padding
       padded_label = label[0..20].ljust(20) + ' | '
       Strainer.ui.set_color padded_label, color
+    end
+
+    # Execute a block inside the sandbox directory defined in 'Strainer.sandbox_path'.
+    # This will first change the 'PWD' env variable to the sandbox path, and then
+    # pass the given block into 'Dir.chdir'. 'PWD' is restored to the original value
+    # when the block is finished.
+    #
+    # @yield The block to execute inside the sandbox
+    # @return [Boolean]
+    #   `true` if the command exited successfully, `false` otherwise
+    def inside_sandbox(&block)
+      Strainer.ui.debug "Changing working directory to '#{Strainer.sandbox_path}'"
+      original_pwd = ENV['PWD']
+
+      ENV['PWD'] = Strainer.sandbox_path.to_s
+      success = Dir.chdir(Strainer.sandbox_path, &block)
+      ENV['PWD'] = original_pwd
+
+      Strainer.ui.debug "Restored working directory to '#{original_pwd}'"
+      success
+    end
+
+    # Execute a block inside the sandboxed cookbook directory.
+    #
+    # @yield The block to execute inside the cookbook sandbox
+    # @return [Boolean]
+    #   `true` if the command exited successfully, `false` otherwise
+    def inside_cookbook(&block)
+      cookbook_path = File.join(Strainer.sandbox_path.to_s, @cookbook.cookbook_name)
+      Strainer.ui.debug "Changing working directory to '#{cookbook_path}'"
+      original_pwd = ENV['PWD']
+
+      ENV['PWD'] = cookbook_path
+      success = Dir.chdir(cookbook_path, &block)
+      ENV['PWD'] = original_pwd
+
+      Strainer.ui.debug "Restoring working directory to '#{original_pwd}'"
+      success
     end
   end
 end
