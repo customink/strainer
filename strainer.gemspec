@@ -8,6 +8,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Run isolated cookbook tests against your chef repository with Strainer.}
   gem.summary       = %q{Strainer allows you to run cookbook tests in an isolated environment while still keeping a single Gemfile and repository for all your cookbooks.}
   gem.homepage      = 'https://github.com/customink/strainer'
+  gem.license       = 'Apache 2.0'
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
