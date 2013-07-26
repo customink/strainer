@@ -37,8 +37,15 @@ module Strainer
       @options = options
 
       if chef_repo?
-        @cookbooks = load_cookbooks(cookbook_names)
+        Strainer.ui.debug "Detected as a chef repo"
+        if cookbook_names.empty?
+          Strainer.ui.fatal "You must specify one or more cookbook names to `strainer test`!"
+          exit(false)
+        else
+          @cookbooks = load_cookbooks(cookbook_names)
+        end
       elsif cookbook_repo?
+        Strainer.ui.debug "Detected as a cookbook repo"
         unless cookbook_names.empty?
           Strainer.ui.warn "Supply specific cookbooks to a cookbook_repo is not supported. Use `strainer test` with no arguments instead."
         end
