@@ -69,13 +69,12 @@ module Strainer
         FileUtils.mv(Strainer.logfile_path, Strainer.sandbox_path.join('strainer.out'))
       end
 
-      if @report.values.collect(&:values).flatten.all?
-        Strainer.ui.say "Strainer marked build OK"
-        return true
-      else
-        Strainer.ui.say "Strainer marked build as failure"
-        return false
-      end
+      success = @report.values.collect(&:values).flatten.all?
+
+      msg = success ? "Strainer marked build OK" : "Strainer marked build as failure"
+      Strainer.ui.say msg
+
+      return success
     end
 
     def hash
