@@ -127,6 +127,3 @@ module Strainer
     end
   end
 end
-
-# Include this module in Thor's shell
-Thor::Base.shell.send(:include, Strainer::UI)
