@@ -60,7 +60,7 @@ module Strainer
       end
     end
 
-    Striner::Cli.commands['test'].options.each do |key|
+    Strainer::Cli.commands['test'].options.each do |key|
       name = key.first
 
       define_method(name) do
