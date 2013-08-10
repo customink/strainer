@@ -88,7 +88,7 @@ require 'strainer/rake_task'
 
 Strainer::RakeTask.new(:strainer) do |s|
   s.except = [...]
-  s.strainerfile = 'MyStraienrfile'
+  s.strainerfile = 'MyStrainerfile'
 end
 ```
 
