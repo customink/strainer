@@ -16,7 +16,8 @@ Gem::Specification.new do |gem|
   gem.name          = 'strainer'
   gem.require_paths = ['lib']
 
-  gem.add_runtime_dependency 'berkshelf', '~> 2.0'
+  gem.add_runtime_dependency 'berkshelf',     '~> 2.0'
+  gem.add_runtime_dependency 'buff-platform', '~> 0.1'
 
   gem.add_development_dependency 'redcarpet'
   gem.add_development_dependency 'yard'
