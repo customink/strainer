@@ -197,7 +197,7 @@ module Strainer
     #   the command to run
     def run_as_system(command)
       Strainer.ui.debug 'Using %x'
-      %x{command}
+      %x{#{command}}
     end
   end
 end
