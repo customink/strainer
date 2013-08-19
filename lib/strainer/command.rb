@@ -15,7 +15,12 @@
 # limitations under the License.
 #
 
-require 'pty'
+begin
+  # PTY is not a thing on Windows :(
+  require 'pty'
+rescue LoadError
+  Strainer.ui.debug "Failed to load 'pty' gem (that's okay, could be on Windows)"
+end
 
 module Strainer
   # The Command class is responsible for a command (test) against a cookbook.
@@ -58,18 +63,8 @@ module Strainer
 
       inside do
         Strainer.ui.debug "Running '#{command}'"
-        speak command
-        PTY.spawn(command) do |r, _, pid|
-          begin
-            r.sync
-            r.each_line { |line| speak line }
-          rescue Errno::EIO => e
-            # Ignore this. Otherwise errors will be thrown whenever
-            # the process is closed
-          ensure
-            ::Process.wait pid
-          end
-        end
+        speak(command)
+        defined?(PTY) ? run_as_pty(command) : run_as_system(command)
 
         unless $?.success?
           Strainer.ui.error label_with_padding + Strainer.ui.set_color('Terminated with a non-zero exit status. Strainer assumes this is a failure.', :red)
@@ -176,6 +171,34 @@ module Strainer
 
       Strainer.ui.debug "Restoring working directory to '#{original_pwd}'"
       success
+    end
+
+    # Run a command using PTY
+    #
+    # @param [String] command
+    #   the command to run
+    def run_as_pty(command)
+      Strainer.ui.debug 'Using PTY'
+      PTY.spawn(command) do |r, _, pid|
+        begin
+          r.sync
+          r.each_line { |line| speak line }
+        rescue Errno::EIO => e
+          # Ignore this. Otherwise errors will be thrown whenever
+          # the process is closed
+        ensure
+          ::Process.wait pid
+        end
+      end
+    end
+
+    # Run a command using Ruby's shell out (backticks/%x).
+    #
+    # @param [String] command
+    #   the command to run
+    def run_as_system(command)
+      Strainer.ui.debug 'Using %x'
+      %x{command}
     end
   end
 end
