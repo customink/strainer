@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+require 'buff/platform'
 require 'strainer'
 require_relative 'strainerfile'
 
@@ -65,7 +66,7 @@ module Strainer
     class_option :strainer_file,  :type => :string,  :aliases => '-s',  :desc => 'The path to the Strainer file to run against', :banner => 'FILE', :default => Strainer::Strainerfile::DEFAULT_FILENAME
     class_option :sandbox,        :type => :string,  :aliases => '-s',  :desc => 'The sandbox path (defaults to a temporary directory)', :default => Dir.mktmpdir
     class_option :debug,          :type => :boolean, :aliases => '-d',  :desc => 'Show debugging log output', :default => false
-    class_option :color,          :type => :boolean, :aliases => '-co', :desc => 'Enable color in Strainer output', :default => true
+    class_option :color,          :type => :boolean, :aliases => '-co', :desc => 'Enable color in Strainer output', :default => !Buff::Platform.windows?
 
     # strainer test *COOKBOOKS
     method_option :except,        :type => :array,   :aliases => '-e', :desc => 'Strainerfile labels to ignore'
