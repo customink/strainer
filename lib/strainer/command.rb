@@ -19,7 +19,6 @@ begin
   # PTY is not a thing on Windows :(
   require 'pty'
 rescue LoadError
-  Strainer.ui.debug "Failed to load 'pty' gem (that's okay, could be on Windows)"
 end
 
 module Strainer
