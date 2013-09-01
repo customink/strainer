@@ -92,7 +92,7 @@ module Strainer
     # strainer -v
     desc 'version', 'Display the version information', hide: true
     def version
-      Strainer.ui.debug "Called Strainer::Cli#veresion"
+      Strainer.ui.debug "Called Strainer::Cli#version"
       Strainer.ui.info Strainer::VERSION
     end
   end
