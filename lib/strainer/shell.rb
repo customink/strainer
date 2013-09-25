@@ -19,7 +19,7 @@ require_relative 'ui'
 
 module Strainer
   class Shell < Thor::Shell::Color
-    include UI
+    include Strainer::UI
 
     class << self
       attr_accessor :enable_colors
@@ -34,7 +34,7 @@ module Strainer
     # colors are enabled for this shell
     #
     # @param [String]
-    #   message to set colors on 
+    #   message to set colors on
     # @param [Symbol] colors
     #   the colors to apply
     def set_color(string, *colors)

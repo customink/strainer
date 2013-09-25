@@ -36,6 +36,9 @@ module Strainer
     attr_reader :options
 
     def initialize(task_name = nil)
+      # Use Strainer::Shell as the primary output shell
+      Thor::Base.shell = Strainer::Shell
+
       @options = {}
       @name    = (task_name || :strainer).to_sym
 
