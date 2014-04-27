@@ -41,7 +41,15 @@ module Strainer
       super(*args)
 
       # Override the config file if it's specified
-      Berkshelf::Chef::Config.path = @options[:config] if @options[:config]
+      if @options[:config]
+        if Berkshelf.const_defined?(:Chef)
+          # Berkshelf 2.0
+          Berkshelf::Chef::Config.path = @options[:config]
+        else
+          # Berkshelf 3.0
+          Berkshelf.chef_config = Ridley::Chef::Config.from_file(@options[:config])
+        end
+      end
 
       # Set the Strainer path if it's specified
       Strainer.sandbox_path = @options[:sandbox] if @options[:sandbox]
