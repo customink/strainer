@@ -2,6 +2,8 @@
 
 Strainer is a gem for isolating and testing individual chef cookbooks. It allows you to keep all your cookbooks in a single repository (saving you time and money), while having all the benefits of individual repositories.
 
+**IMPORTANT! Strainer is no longer maintained as monolithic Chef repositories are no longer recommended.** This documentation and repository are kept here for historical reasons.
+
 Usage
 -----
 First, create a `Strainerfile`. Cookbook-level Strainerfiles will take precedence over root-level ones. For simplicity, let's just create one in the root of our chef repository:
