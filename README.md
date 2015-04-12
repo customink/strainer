@@ -41,7 +41,7 @@ As of `2.0.0`, Strainer supports "standalone" mode. This allows you to use Strai
 
     $ bundle exec strainer test
 
-from the root of your cookbook. **Note**: your cookbook must have it's own Gemfile and working directory.
+from the root of your cookbook. **Note**: your cookbook must have its own Gemfile and working directory.
 
 Running on CI
 -------------
